@@ -1,7 +1,16 @@
 
+"use client";
+
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 
 export function Footer() {
+  const [year, setYear] = useState<number | null>(null);
+
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
+
   return (
     <footer className="w-full border-t bg-muted/30 py-12">
       <div className="container mx-auto px-4">
@@ -32,7 +41,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-12 pt-8 border-t text-center text-xs text-muted-foreground">
-          &copy; {new Date().getFullYear()} SalleDeVente.sn par Ogo&apos;o SARL. Tous droits réservés.
+          &copy; {year ?? '...'} SalleDeVente.sn par Ogo&apos;o SARL. Tous droits réservés.
         </div>
       </div>
     </footer>
