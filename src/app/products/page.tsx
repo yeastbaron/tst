@@ -10,13 +10,15 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Search, Filter, Sparkles, SlidersHorizontal, Loader2 } from 'lucide-react';
+import { Search, Filter, Sparkles, SlidersHorizontal, Loader2, Grid2X2, Grid3X3 } from 'lucide-react';
 import { smartProductSearch } from '@/ai/flows/smart-product-search-flow';
+import { cn } from '@/lib/utils';
 
 export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [gridCols, setGridCols] = useState(2);
 
   // Expanded mock data
   const allProducts = [
@@ -110,13 +112,40 @@ export default function ProductsPage() {
                 {selectedCategory ? CATEGORIES.find(c => c.id === selectedCategory)?.name : 'Tous les articles'}
                 <span className="ml-2 text-muted-foreground font-medium normal-case text-lg">({filteredProducts.length})</span>
               </h1>
-              <Button variant="ghost" className="font-bold flex items-center gap-2 text-primary">
-                <SlidersHorizontal className="h-5 w-5" /> Filtrer & Trier
-              </Button>
+              
+              <div className="flex items-center gap-4">
+                {/* Grid Switcher for Mobile/Tablet */}
+                <div className="flex items-center gap-1 bg-white border rounded-lg p-1 lg:hidden">
+                  <Button 
+                    variant={gridCols === 2 ? "secondary" : "ghost"} 
+                    size="sm" 
+                    className="h-8 w-8 p-0" 
+                    onClick={() => setGridCols(2)}
+                  >
+                    <Grid2X2 className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant={gridCols === 3 ? "secondary" : "ghost"} 
+                    size="sm" 
+                    className="h-8 w-8 p-0" 
+                    onClick={() => setGridCols(3)}
+                  >
+                    <Grid3X3 className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <Button variant="ghost" className="font-bold flex items-center gap-2 text-primary">
+                  <SlidersHorizontal className="h-5 w-5" /> <span className="hidden sm:inline">Filtrer & Trier</span>
+                </Button>
+              </div>
             </div>
 
             {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              <div className={cn(
+                "grid gap-4 md:gap-6",
+                gridCols === 2 ? "grid-cols-2 sm:grid-cols-2" : "grid-cols-3 sm:grid-cols-3",
+                "lg:grid-cols-4 xl:grid-cols-5"
+              )}>
                 {filteredProducts.map(p => (
                   <ProductCard key={p.id} product={{ ...p, category: CATEGORIES.find(c => c.id === p.category)?.name || p.category }} />
                 ))}
