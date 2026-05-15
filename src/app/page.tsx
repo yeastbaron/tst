@@ -1,10 +1,11 @@
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
-import { CATEGORIES } from '@/lib/constants';
+import { CATEGORIES, calculatePriceWithCommission } from '@/lib/constants';
 import { ProductCard } from '@/components/products/ProductCard';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { AdBanner } from '@/components/ads/AdBanner';
+import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Sparkles } from 'lucide-react';
@@ -23,6 +24,16 @@ export default function Home() {
     { id: '7', title: 'Parfum Sauvage', basePrice: 65000, image: PlaceHolderImages[4].imageUrl, condition: 'new' as const, category: 'Beauté' },
     { id: '8', title: 'PS5 Slim 1To', basePrice: 380000, image: PlaceHolderImages[5].imageUrl, condition: 'new' as const, category: 'Sports' },
   ];
+
+  // Mock function to get samples for a category
+  const getCategorySamples = (categoryName: string) => {
+    return [
+      { id: `s1-${categoryName}`, title: `Article ${categoryName} 1`, basePrice: 25000, image: PlaceHolderImages[0].imageUrl, condition: 'used' as const, category: categoryName },
+      { id: `s2-${categoryName}`, title: `Article ${categoryName} 2`, basePrice: 45000, image: PlaceHolderImages[1].imageUrl, condition: 'new' as const, category: categoryName },
+      { id: `s3-${categoryName}`, title: `Article ${categoryName} 3`, basePrice: 15000, image: PlaceHolderImages[2].imageUrl, condition: 'used' as const, category: categoryName },
+      { id: `s4-${categoryName}`, title: `Article ${categoryName} 4`, basePrice: 85000, image: PlaceHolderImages[3].imageUrl, condition: 'new' as const, category: categoryName },
+    ];
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -44,9 +55,76 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 md:gap-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 md:gap-4">
               {featuredProducts.map((p) => (
                 <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Categories Section - Carousel on Mobile/Tablet, Grid on Desktop */}
+        <section className="py-8 border-t bg-muted/5">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl md:text-2xl font-black tracking-tight uppercase">Catégories</h2>
+            </div>
+            
+            {/* Mobile/Tablet Carousel */}
+            <div className="block lg:hidden">
+              <Carousel className="w-full">
+                <CarouselContent className="-ml-2">
+                  {CATEGORIES.map((cat) => (
+                    <CarouselItem key={cat.id} className="pl-2 basis-1/3 sm:basis-1/4">
+                      <Link href={`/products?category=${cat.id}`} className="group flex flex-col">
+                        <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-white border border-border/50">
+                          <Image 
+                            src={cat.image || 'https://picsum.photos/seed/placeholder/400/400'} 
+                            alt={cat.name}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                            sizes="33vw"
+                            data-ai-hint="product category"
+                          />
+                          <div className="absolute inset-0 bg-black/20" />
+                          <div className="absolute inset-0 flex items-center justify-center p-1">
+                             <span className="text-white text-[9px] sm:text-[10px] font-black uppercase text-center leading-tight drop-shadow-md">
+                               {cat.name}
+                             </span>
+                          </div>
+                        </div>
+                      </Link>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+              </Carousel>
+            </div>
+
+            {/* Desktop Grid */}
+            <div className="hidden lg:grid grid-cols-3 gap-8">
+              {CATEGORIES.map((cat) => (
+                <Link 
+                  key={cat.id} 
+                  href={`/products?category=${cat.id}`}
+                  className="group flex flex-col"
+                >
+                  <div className="relative w-full aspect-[16/9] rounded-[2.5rem] overflow-hidden bg-white border border-border/50 hover:border-primary/30 hover:shadow-xl transition-all mb-4">
+                    <Image 
+                      src={cat.image || 'https://picsum.photos/seed/placeholder/800/450'} 
+                      alt={cat.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      sizes="33vw"
+                      data-ai-hint="product category"
+                    />
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                    <div className="absolute inset-0 flex items-center justify-center p-4">
+                       <span className="text-white text-xl font-black uppercase tracking-widest drop-shadow-lg text-center leading-tight">
+                         {cat.name}
+                       </span>
+                    </div>
+                  </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -67,49 +145,9 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 md:gap-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 md:gap-4">
               {recentProducts.map((p) => (
                 <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Ad Banner 3: Above Categories */}
-        <div className="container mx-auto px-4 py-8">
-          <AdBanner id="ad-banner" />
-        </div>
-
-        {/* Categories Grid - 3 Columns */}
-        <section className="py-12 border-t bg-muted/10">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-xl md:text-2xl font-black tracking-tight uppercase">Catégories</h2>
-            </div>
-            <div className="grid grid-cols-3 gap-3 md:gap-8">
-              {CATEGORIES.map((cat) => (
-                <Link 
-                  key={cat.id} 
-                  href={`/products?category=${cat.id}`}
-                  className="group flex flex-col"
-                >
-                  <div className="relative w-full aspect-square md:aspect-[16/9] rounded-xl md:rounded-[2.5rem] overflow-hidden bg-white border border-border/50 hover:border-primary/30 hover:shadow-xl transition-all mb-2 md:mb-4">
-                    <Image 
-                      src={cat.image || 'https://picsum.photos/seed/placeholder/800/450'} 
-                      alt={cat.name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      sizes="(max-width: 768px) 33vw, 33vw"
-                      data-ai-hint={cat.id === 'electronics' ? 'smartphone laptop' : cat.id === 'fashion' ? 'fashion clothing' : 'product category'}
-                    />
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-                    <div className="absolute inset-0 flex items-center justify-center p-2">
-                       <span className="text-white text-[10px] sm:text-xs md:text-xl font-black uppercase tracking-tight md:tracking-widest drop-shadow-lg text-center leading-tight">
-                         {cat.name}
-                       </span>
-                    </div>
-                  </div>
-                </Link>
               ))}
             </div>
           </div>
@@ -136,6 +174,30 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* Category Samples Sections - Full page content */}
+        {CATEGORIES.map((cat) => (
+          <section key={cat.id} className="py-10 border-t last:mb-10">
+            <div className="container mx-auto px-4">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl md:text-2xl font-black tracking-tight uppercase">{cat.name}</h2>
+                <Link href={`/products?category=${cat.id}`} className="text-primary font-bold flex items-center gap-1 hover:underline text-xs md:text-sm">
+                  Voir plus <ArrowRight className="h-3 w-3 md:h-4 md:w-4" />
+                </Link>
+              </div>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 md:gap-4">
+                {getCategorySamples(cat.name).map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+            </div>
+          </section>
+        ))}
+
+        {/* Ad Banner 3: Bottom */}
+        <div className="container mx-auto px-4 py-8">
+          <AdBanner id="ad-banner" />
+        </div>
       </main>
 
       <Footer />
