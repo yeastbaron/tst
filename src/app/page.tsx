@@ -17,7 +17,7 @@ import { collection, query, where, orderBy, limit } from 'firebase/firestore';
 export default function Home() {
   const db = useFirestore();
 
-  // Produits à la une : les plus récents validés
+  // Produits à la une : les plus récents validés (status == active)
   const featuredQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(

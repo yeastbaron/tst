@@ -39,11 +39,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": "#/backend/entities/UserProfile",
-      "description": "Les utilisateurs peuvent lire et écrire leur propre profil. L'admin peut tout lire."
+      "description": "Les utilisateurs peuvent lire et écrire leur propre profil. L'administrateur a un accès complet en lecture."
     },
     "/products/{productId}": {
       "schema": "#/backend/entities/Product",
-      "description": "Tout le monde peut lire les produits actifs. Les utilisateurs connectés peuvent créer des produits. Les propriétaires peuvent modifier leurs produits. L'admin peut tout modifier (validation)."
+      "description": "Lecture publique autorisée pour TOUS les produits ayant le statut 'active'. Les utilisateurs connectés peuvent créer des annonces. Seul le propriétaire ou l'administrateur peut modifier ou supprimer."
     }
   }
 }
