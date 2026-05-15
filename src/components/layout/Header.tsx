@@ -58,6 +58,11 @@ export function Header() {
         router.push('/admin');
       }
     } catch (error: any) {
+      // Ignorer l'erreur si l'utilisateur ferme simplement la popup
+      if (error.code === 'auth/popup-closed-by-user') {
+        return;
+      }
+
       console.error("Erreur de connexion:", error);
       
       let title = "Erreur d'authentification";
