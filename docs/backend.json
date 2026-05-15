@@ -38,11 +38,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": "#/backend/entities/UserProfile",
-      "description": "LECTURE/ÉCRITURE : Autorisé pour le propriétaire du profil (userId == auth.uid) ou l'administrateur (ndaw22@gmail.com)."
+      "description": "LECTURE/ÉCRITURE : Autorisé uniquement pour le propriétaire du compte (userId == auth.uid) ou l'administrateur (ndaw22@gmail.com)."
     },
     "/products/{productId}": {
       "schema": "#/backend/entities/Product",
-      "description": "LECTURE : Publique pour tous si status == 'active'. ÉCRITURE : Création autorisée pour tout utilisateur authentifié (auth != null). Mise à jour/Suppression autorisée uniquement pour le propriétaire (sellerId == auth.uid) ou l'administrateur (ndaw22@gmail.com)."
+      "description": "LECTURE : Accès public autorisé pour tous si status == 'active'. Les propriétaires (sellerId == auth.uid) peuvent lire leurs propres annonces quel que soit le statut. L'administrateur (ndaw22@gmail.com) peut lire toutes les annonces. ÉCRITURE : Création autorisée pour tout utilisateur authentifié. Mise à jour et suppression autorisées uniquement pour le propriétaire de l'annonce (sellerId == auth.uid) ou l'administrateur (ndaw22@gmail.com)."
     }
   }
 }
