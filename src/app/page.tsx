@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { CATEGORIES, calculatePriceWithCommission } from '@/lib/constants';
 import { ProductCard } from '@/components/products/ProductCard';
 import { AdBanner } from '@/components/ads/AdBanner';
-import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Sparkles, Loader2 } from 'lucide-react';

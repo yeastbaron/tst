@@ -43,7 +43,7 @@
     },
     "/products/{productId}": {
       "schema": "#/backend/entities/Product",
-      "description": "Lecture publique autorisée pour TOUS les produits ayant le statut 'active'. Les utilisateurs connectés peuvent créer des annonces. Seul le propriétaire ou l'administrateur peut modifier ou supprimer."
+      "description": "LECTURE PUBLIQUE (get et list) autorisée pour n'importe quel visiteur SI le produit a le statut 'active'. Les utilisateurs connectés peuvent créer des annonces. Seul le propriétaire ou l'administrateur (ndaw22@gmail.com) peut modifier ou supprimer."
     }
   }
 }
