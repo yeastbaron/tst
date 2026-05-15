@@ -39,11 +39,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": "#/backend/entities/UserProfile",
-      "description": "Les utilisateurs peuvent lire et écrire leur propre profil. L'administrateur a un accès complet en lecture."
+      "description": "Les utilisateurs peuvent lire et écrire leur propre profil. L'administrateur (ndaw22@gmail.com) a un accès complet en lecture."
     },
     "/products/{productId}": {
       "schema": "#/backend/entities/Product",
-      "description": "LECTURE PUBLIQUE (get et list) autorisée pour n'importe quel visiteur SI le produit a le statut 'active'. Les utilisateurs connectés peuvent créer des annonces. Seul le propriétaire ou l'administrateur (ndaw22@gmail.com) peut modifier ou supprimer."
+      "description": "LECTURE PUBLIQUE AUTORISÉE : N'importe quel visiteur peut lire et lister les produits si status == 'active'. Les utilisateurs connectés peuvent créer des annonces. Seul le propriétaire ou l'administrateur (ndaw22@gmail.com) peut modifier ou supprimer."
     }
   }
 }
