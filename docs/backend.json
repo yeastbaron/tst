@@ -39,11 +39,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": "#/backend/entities/UserProfile",
-      "description": "Les utilisateurs peuvent lire et écrire leur propre profil. L'administrateur (ndaw22@gmail.com) a un accès complet en lecture."
+      "description": "ACCÈS PROFIL : Les utilisateurs authentifiés lisent et écrivent leur propre document. L'admin (ndaw22@gmail.com) a un accès complet."
     },
     "/products/{productId}": {
       "schema": "#/backend/entities/Product",
-      "description": "LECTURE PUBLIQUE AUTORISÉE : N'importe quel visiteur peut lire et lister les produits si status == 'active'. Les utilisateurs connectés peuvent créer des annonces. Seul le propriétaire ou l'administrateur (ndaw22@gmail.com) peut modifier ou supprimer."
+      "description": "ACCÈS PRODUITS : Lecture publique autorisée pour TOUS si status == 'active'. Création autorisée pour tout utilisateur connecté. Modification/Suppression réservée au propriétaire (sellerId) ou à l'admin (ndaw22@gmail.com)."
     }
   }
 }
