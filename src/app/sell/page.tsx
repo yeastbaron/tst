@@ -10,9 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CATEGORIES, COMMISSION_RATE } from '@/lib/constants';
-import { Camera, X, Loader2, Sparkles } from 'lucide-react';
+import { Camera, X, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { autoProductListing } from '@/ai/flows/auto-product-listing-flow';
 import { useFirestore, useUser } from '@/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
@@ -31,7 +30,6 @@ export default function SellPage() {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [condition, setCondition] = useState('used');
-  const [isGenerating, setIsGenerating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const buyerPrice = price ? Math.ceil(parseFloat(price) * (1 + COMMISSION_RATE)) : 0;
@@ -51,43 +49,6 @@ export default function SellPage() {
 
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSmartDraft = async () => {
-    if (!title || images.length === 0) {
-      toast({
-        title: "Infos manquantes",
-        description: "Veuillez ajouter un titre et au moins une photo pour générer la description.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsGenerating(true);
-    try {
-      const result = await autoProductListing({
-        title,
-        photoDataUris: images
-      });
-      setDescription(result.description);
-      if (result.suggestedCategories.length > 0) {
-        const suggested = result.suggestedCategories[0].toLowerCase();
-        const found = CATEGORIES.find(c => suggested.includes(c.name.toLowerCase()));
-        if (found) setCategory(found.id);
-      }
-      toast({
-        title: "Description générée !",
-        description: "Nous avons rédigé une annonce professionnelle pour vous."
-      });
-    } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Impossible de générer la description automatique.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsGenerating(false);
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -215,20 +176,7 @@ export default function SellPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="description" className="text-sm font-black uppercase tracking-wider">Description</Label>
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-primary font-bold hover:bg-primary/5"
-                      onClick={handleSmartDraft}
-                      disabled={isGenerating}
-                    >
-                      {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
-                      Générer par IA
-                    </Button>
-                  </div>
+                  <Label htmlFor="description" className="text-sm font-black uppercase tracking-wider">Description</Label>
                   <Textarea 
                     id="description" 
                     placeholder="Décrivez votre article (points forts, défauts, etc.)" 
