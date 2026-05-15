@@ -1,37 +1,57 @@
+
 "use client";
 
 import { useParams } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { calculatePriceWithCommission, CATEGORIES } from '@/lib/constants';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ShieldCheck, Truck, MessageSquare, Heart, Share2, Info } from 'lucide-react';
+import { ShieldCheck, Truck, Heart, Share2, Info, Loader2, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
+import { useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import Link from 'next/link';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const [activeImage, setActiveImage] = useState(0);
+  const db = useFirestore();
 
-  const product = {
-    id: id as string,
-    title: 'iPhone 13 Pro 256GB - Bleu Alpin',
-    basePrice: 350000,
-    description: "Cet iPhone est en excellent état, quasiment neuf. Aucune rayure sur l'écran. La batterie est à 92% de sa capacité. Livré avec sa boîte d'origine et le câble de recharge. Parfait pour un usage quotidien avec une superbe qualité photo.",
-    condition: 'used' as const,
-    category: 'electronics',
-    images: [
-      PlaceHolderImages[0].imageUrl,
-      PlaceHolderImages[1].imageUrl,
-      PlaceHolderImages[2].imageUrl,
-    ],
-    features: ['Stockage: 256GB', 'Batterie: 92%', 'Écran OLED Super Retina', 'iOS 17 compatible'],
-    publishedAt: 'Il y a 2 heures'
-  };
+  const productRef = useMemoFirebase(() => {
+    if (!db || !id) return null;
+    return doc(db, 'products', id as string);
+  }, [db, id]);
+
+  const { data: product, loading } = useDoc(productRef);
+
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin h-8 w-8 text-primary" />
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-1 flex flex-col items-center justify-center space-y-4 p-8">
+          <h1 className="text-2xl font-black uppercase">Oups ! Article introuvable.</h1>
+          <p className="text-muted-foreground">Cette annonce n'existe plus ou a été retirée.</p>
+          <Button asChild className="rounded-xl"><Link href="/products">Retour aux articles</Link></Button>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   const finalPrice = calculatePriceWithCommission(product.basePrice);
+  const images = product.images && product.images.length > 0 
+    ? product.images 
+    : ['https://picsum.photos/seed/placeholder/800/800'];
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -39,18 +59,22 @@ export default function ProductDetailPage() {
       
       <main className="flex-1 py-8 md:py-12 bg-muted/10">
         <div className="container mx-auto px-4">
+          <Link href="/products" className="inline-flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-primary mb-6 transition-colors">
+            <ArrowLeft className="h-4 w-4" /> Retour à la liste
+          </Link>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div className="space-y-4">
               <div className="aspect-square relative rounded-[2rem] overflow-hidden bg-white border shadow-sm">
                 <Image 
-                  src={product.images[activeImage]} 
+                  src={images[activeImage]} 
                   alt={product.title}
                   fill
                   className="object-cover"
                 />
               </div>
               <div className="grid grid-cols-4 gap-4">
-                {product.images.map((img, i) => (
+                {images.map((img: string, i: number) => (
                   <button 
                     key={i} 
                     onClick={() => setActiveImage(i)}
@@ -66,9 +90,11 @@ export default function ProductDetailPage() {
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="px-3 py-1 font-bold text-xs uppercase bg-primary/10 text-primary border-none">
-                    {product.condition === 'new' ? 'Neuf' : 'Occasion'}
+                    {product.condition === 'new' ? 'Neuf' : product.condition === 'used' ? 'Occasion' : 'Reconditionné'}
                   </Badge>
-                  <span className="text-sm text-muted-foreground font-medium">Publié {product.publishedAt}</span>
+                  <Badge variant="outline" className="text-xs uppercase font-bold">
+                    {CATEGORIES.find(c => c.id === product.category)?.name || product.category}
+                  </Badge>
                 </div>
                 <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight uppercase">
                   {product.title}
@@ -95,7 +121,7 @@ export default function ProductDetailPage() {
                   <ShieldCheck className="h-8 w-8 text-primary" />
                   <div>
                     <p className="font-bold text-sm">Achat Sécurisé</p>
-                    <p className="text-xs text-muted-foreground">Nous vérifions l&apos;article</p>
+                    <p className="text-xs text-muted-foreground">Nous vérifions l'article</p>
                   </div>
                 </div>
                 <div className="flex gap-3 items-center bg-white p-4 rounded-2xl border">
@@ -113,7 +139,7 @@ export default function ProductDetailPage() {
                   <h3 className="uppercase tracking-tight">Anonymat Garanti</h3>
                 </div>
                 <p className="text-sm text-muted-foreground font-medium leading-relaxed">
-                  L&apos;identité du vendeur est protégée. SalleDeVente.sn agit comme tiers de confiance. Toutes les communications et transactions passent par nous.
+                  L'identité du vendeur est protégée. SalleDeVente.sn agit comme tiers de confiance.
                 </p>
               </div>
 
@@ -124,14 +150,6 @@ export default function ProductDetailPage() {
                 <p className="text-lg text-muted-foreground leading-relaxed font-medium">
                   {product.description}
                 </p>
-                <div className="grid grid-cols-2 gap-x-8 gap-y-2 pt-2">
-                  {product.features.map((f, i) => (
-                    <div key={i} className="flex items-center gap-2 text-sm font-bold">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                      {f}
-                    </div>
-                  ))}
-                </div>
               </div>
 
               <div className="flex items-center justify-between pt-8 border-t">
