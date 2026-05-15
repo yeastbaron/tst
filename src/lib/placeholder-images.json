@@ -41,6 +41,12 @@
       "description": "Professional tools and equipment",
       "imageUrl": "https://picsum.photos/seed/pro1/800/600",
       "imageHint": "tools industrial"
+    },
+    {
+      "id": "ad-banner",
+      "description": "Publicité commerciale",
+      "imageUrl": "https://picsum.photos/seed/adsense/1200/200",
+      "imageHint": "advertisement banner"
     }
   ]
 }

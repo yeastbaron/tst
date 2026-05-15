@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -7,10 +6,10 @@ import { Footer } from '@/components/layout/Footer';
 import { CATEGORIES } from '@/lib/constants';
 import { ProductCard } from '@/components/products/ProductCard';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { AdBanner } from '@/components/ads/AdBanner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Search, Filter, Sparkles, SlidersHorizontal, Loader2, Grid2X2, Grid3X3 } from 'lucide-react';
+import { Search, SlidersHorizontal, Loader2, Grid2X2, Grid3X3, Sparkles } from 'lucide-react';
 import { smartProductSearch } from '@/ai/flows/smart-product-search-flow';
 import { cn } from '@/lib/utils';
 
@@ -20,7 +19,6 @@ export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [gridCols, setGridCols] = useState(2);
 
-  // Expanded mock data
   const allProducts = [
     { id: '1', title: 'iPhone 13 Pro 256GB', basePrice: 350000, image: PlaceHolderImages[0].imageUrl, condition: 'used' as const, category: 'electronics' },
     { id: '2', title: 'MacBook Air M2 2023', basePrice: 750000, image: PlaceHolderImages[0].imageUrl, condition: 'new' as const, category: 'electronics' },
@@ -37,9 +35,6 @@ export default function ProductsPage() {
     setIsSearching(true);
     try {
       const result = await smartProductSearch({ query: searchQuery });
-      // In a real app, we'd use these parameters to query a database
-      console.log("Inferred params:", result);
-      // Simulate filtering
       if (result.category) setSelectedCategory(result.category.toLowerCase());
     } finally {
       setIsSearching(false);
@@ -104,8 +99,13 @@ export default function ProductsPage() {
           </div>
         </section>
 
+        {/* Ad Banner on Shop Page */}
+        <div className="container mx-auto px-4 mt-8">
+          <AdBanner className="mb-8" />
+        </div>
+
         {/* Product Grid */}
-        <section className="py-12">
+        <section className="py-4">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between mb-8">
               <h1 className="text-2xl font-black uppercase tracking-tight">
@@ -114,7 +114,6 @@ export default function ProductsPage() {
               </h1>
               
               <div className="flex items-center gap-4">
-                {/* Grid Switcher for Mobile/Tablet */}
                 <div className="flex items-center gap-1 bg-white border rounded-lg p-1 lg:hidden">
                   <Button 
                     variant={gridCols === 2 ? "secondary" : "ghost"} 

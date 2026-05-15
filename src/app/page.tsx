@@ -1,20 +1,19 @@
-
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { CATEGORIES } from '@/lib/constants';
 import { ProductCard } from '@/components/products/ProductCard';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { AdBanner } from '@/components/ads/AdBanner';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Sparkles } from 'lucide-react';
 
 export default function Home() {
-  // Products split into Featured and Recent for the home page
   const featuredProducts = [
     { id: '1', title: 'iPhone 13 Pro', basePrice: 350000, image: PlaceHolderImages[0].imageUrl, condition: 'used' as const, category: 'Électronique' },
     { id: '2', title: 'MacBook Air M2', basePrice: 750000, image: PlaceHolderImages[0].imageUrl, condition: 'new' as const, category: 'Électronique' },
-    { id: '3', title: ' Jordan Retro 4', basePrice: 45000, image: PlaceHolderImages[1].imageUrl, condition: 'new' as const, category: 'Mode' },
+    { id: '3', title: 'Jordan Retro 4', basePrice: 45000, image: PlaceHolderImages[1].imageUrl, condition: 'new' as const, category: 'Mode' },
     { id: '4', title: 'Canapé Scandinave', basePrice: 200000, image: PlaceHolderImages[2].imageUrl, condition: 'used' as const, category: 'Maison' },
   ];
 
@@ -30,8 +29,13 @@ export default function Home() {
       <Header />
       
       <main className="flex-1">
+        {/* Ad Banner 1: Top of Page */}
+        <div className="container mx-auto px-4 pt-6">
+          <AdBanner />
+        </div>
+
         {/* Featured Products Section */}
-        <section className="py-8 md:py-10 bg-accent/30">
+        <section className="py-8 md:py-10">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
@@ -48,8 +52,13 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Ad Banner 2: Middle */}
+        <div className="container mx-auto px-4 py-4">
+          <AdBanner id="ad-banner" />
+        </div>
+
         {/* Recent Products Section */}
-        <section className="py-8 md:py-12">
+        <section className="py-8 md:py-12 bg-accent/30">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl md:text-2xl font-black tracking-tight uppercase">Articles Récents</h2>
@@ -65,6 +74,11 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* Ad Banner 3: Above Categories */}
+        <div className="container mx-auto px-4 py-8">
+          <AdBanner id="ad-banner" />
+        </div>
 
         {/* Categories Grid - 3 Columns */}
         <section className="py-12 border-t bg-muted/10">
