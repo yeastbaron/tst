@@ -6,7 +6,7 @@ import { Search, PlusCircle, User, Menu, X, ShoppingBag } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { CATEGORIES } from '@/lib/constants';
 
 export function Header() {
@@ -23,6 +23,10 @@ export function Header() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+            <SheetTitle className="sr-only">Menu de navigation</SheetTitle>
+            <SheetDescription className="sr-only">
+              Accédez aux catégories et aux options de vente de SalleDeVente.sn
+            </SheetDescription>
             <nav className="flex flex-col gap-4 mt-8">
               <Link href="/" className="text-lg font-bold">Accueil</Link>
               <div className="space-y-2">
