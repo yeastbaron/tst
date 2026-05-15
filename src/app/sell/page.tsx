@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CATEGORIES, COMMISSION_RATE } from '@/lib/constants';
-import { Camera, X, Loader2 } from 'lucide-react';
+import { Camera, X, Loader2, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useUser } from '@/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -21,7 +21,7 @@ import { FirestorePermissionError } from '@/firebase/errors';
 export default function SellPage() {
   const { toast } = useToast();
   const router = useRouter();
-  const { user } = useUser();
+  const { user, loading } = useUser();
   const db = useFirestore();
   
   const [images, setImages] = useState<string[]>([]);
@@ -31,6 +31,12 @@ export default function SellPage() {
   const [category, setCategory] = useState('');
   const [condition, setCondition] = useState('used');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login?redirect=/sell');
+    }
+  }, [user, loading, router]);
 
   const buyerPrice = price ? Math.ceil(parseFloat(price) * (1 + COMMISSION_RATE)) : 0;
 
@@ -53,14 +59,7 @@ export default function SellPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-      toast({
-        title: "Connexion requise",
-        description: "Veuillez vous connecter pour publier une annonce.",
-        variant: "destructive"
-      });
-      return;
-    }
+    if (!user) return;
 
     setIsSubmitting(true);
 
@@ -82,7 +81,7 @@ export default function SellPage() {
           title: "Annonce soumise !",
           description: "Notre équipe va valider votre article sous 24h.",
         });
-        router.push('/');
+        router.push('/my-listings');
       })
       .catch(async (error) => {
         const permissionError = new FirestorePermissionError({
@@ -94,6 +93,16 @@ export default function SellPage() {
         setIsSubmitting(false);
       });
   };
+
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin h-8 w-8 text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) return null;
 
   return (
     <div className="flex flex-col min-h-screen bg-muted/20">
@@ -149,7 +158,7 @@ export default function SellPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="category" className="text-sm font-black uppercase tracking-wider">Catégorie</Label>
-                    <Select value={category} onValueChange={setCategory}>
+                    <Select value={category} onValueChange={setCategory} required>
                       <SelectTrigger id="category" className="h-12 font-medium">
                         <SelectValue placeholder="Choisir une catégorie" />
                       </SelectTrigger>
@@ -162,7 +171,7 @@ export default function SellPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="condition" className="text-sm font-black uppercase tracking-wider">État</Label>
-                    <Select value={condition} onValueChange={setCondition}>
+                    <Select value={condition} onValueChange={setCondition} required>
                       <SelectTrigger id="condition" className="h-12 font-medium">
                         <SelectValue placeholder="État du produit" />
                       </SelectTrigger>
