@@ -39,11 +39,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": "#/backend/entities/UserProfile",
-      "description": "Collection des profils utilisateurs."
+      "description": "Les utilisateurs peuvent lire et écrire leur propre profil. L'admin peut tout lire."
     },
     "/products/{productId}": {
       "schema": "#/backend/entities/Product",
-      "description": "Collection de toutes les annonces de produits."
+      "description": "Tout le monde peut lire les produits actifs. Les utilisateurs connectés peuvent créer des produits. Les propriétaires peuvent modifier leurs produits. L'admin peut tout modifier (validation)."
     }
   }
 }

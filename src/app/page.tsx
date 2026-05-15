@@ -17,15 +17,18 @@ import { collection, query, where, orderBy, limit } from 'firebase/firestore';
 export default function Home() {
   const db = useFirestore();
 
+  // Produits à la une : les plus récents validés
   const featuredQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(
       collection(db, 'products'),
       where('status', '==', 'active'),
+      orderBy('createdAt', 'desc'),
       limit(6)
     );
   }, [db]);
 
+  // Nouveautés : les 8 derniers articles actifs
   const recentQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(
