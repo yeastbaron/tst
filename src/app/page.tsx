@@ -7,15 +7,18 @@ import { ProductCard } from '@/components/products/ProductCard';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 
 export default function Home() {
-  // Mock products from various categories for the home page
+  // Products split into Featured and Recent for the home page
   const featuredProducts = [
     { id: '1', title: 'iPhone 13 Pro', basePrice: 350000, image: PlaceHolderImages[0].imageUrl, condition: 'used' as const, category: 'Électronique' },
     { id: '2', title: 'MacBook Air M2', basePrice: 750000, image: PlaceHolderImages[0].imageUrl, condition: 'new' as const, category: 'Électronique' },
-    { id: '3', title: 'Jordan Retro 4', basePrice: 45000, image: PlaceHolderImages[1].imageUrl, condition: 'new' as const, category: 'Mode' },
+    { id: '3', title: ' Jordan Retro 4', basePrice: 45000, image: PlaceHolderImages[1].imageUrl, condition: 'new' as const, category: 'Mode' },
     { id: '4', title: 'Canapé Scandinave', basePrice: 200000, image: PlaceHolderImages[2].imageUrl, condition: 'used' as const, category: 'Maison' },
+  ];
+
+  const recentProducts = [
     { id: '5', title: 'Mercedes C200', basePrice: 8500000, image: PlaceHolderImages[3].imageUrl, condition: 'used' as const, category: 'Véhicules' },
     { id: '6', title: 'Montre Seiko 5', basePrice: 120000, image: PlaceHolderImages[1].imageUrl, condition: 'new' as const, category: 'Mode' },
     { id: '7', title: 'Parfum Sauvage', basePrice: 65000, image: PlaceHolderImages[4].imageUrl, condition: 'new' as const, category: 'Beauté' },
@@ -28,16 +31,15 @@ export default function Home() {
       
       <main className="flex-1">
         {/* Featured Products Section */}
-        <section className="py-8 md:py-12 bg-muted/20">
+        <section className="py-8 md:py-10 bg-accent/30">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-6 md:mb-8">
-              <h2 className="text-xl md:text-2xl font-black tracking-tight uppercase">Articles Récents</h2>
-              <Link href="/products" className="text-primary font-bold flex items-center gap-1 hover:underline text-xs md:text-sm">
-                Voir tout <ArrowRight className="h-3 w-3 md:h-4 md:w-4" />
-              </Link>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-secondary fill-secondary" />
+                <h2 className="text-xl md:text-2xl font-black tracking-tight uppercase">Articles à la Une</h2>
+              </div>
             </div>
 
-            {/* Grid for all sizes: 3 cols on mobile, 4 on tablet, 6-8 on desktop */}
             <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 md:gap-4">
               {featuredProducts.map((p) => (
                 <ProductCard key={p.id} product={p} />
@@ -46,8 +48,26 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Recent Products Section */}
+        <section className="py-8 md:py-12">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl md:text-2xl font-black tracking-tight uppercase">Articles Récents</h2>
+              <Link href="/products" className="text-primary font-bold flex items-center gap-1 hover:underline text-xs md:text-sm">
+                Voir tout <ArrowRight className="h-3 w-3 md:h-4 md:w-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 md:gap-4">
+              {recentProducts.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Categories Grid - 3 Columns */}
-        <section className="py-12 border-t">
+        <section className="py-12 border-t bg-muted/10">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-xl md:text-2xl font-black tracking-tight uppercase">Catégories</h2>
