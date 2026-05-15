@@ -53,10 +53,11 @@ export default function ProductsPage() {
       
       <main className="flex-1 bg-muted/10 pb-20">
         {/* Search Header */}
-        <section className="bg-white border-b py-8 sticky top-16 z-40">
+        <section className="bg-white border-b py-4 md:py-8 sticky top-16 z-40">
           <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto space-y-6">
-              <div className="relative group">
+            <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
+              {/* Hidden on mobile, visible on desktop */}
+              <div className="relative group hidden md:block">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input 
                   value={searchQuery}
