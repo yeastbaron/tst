@@ -3,7 +3,7 @@
   "entities": {
     "UserProfile": {
       "title": "Profil Utilisateur",
-      "description": "Données spécifiques à l'utilisateur et rôles.",
+      "description": "Données utilisateur. Chaque utilisateur peut gérer son propre profil.",
       "type": "object",
       "properties": {
         "uid": { "type": "string" },
@@ -17,7 +17,7 @@
     },
     "Product": {
       "title": "Produit",
-      "description": "Annonce d'un produit dans la marketplace.",
+      "description": "Annonce produit. Lecture publique si actif. Création autorisée pour tout utilisateur connecté.",
       "type": "object",
       "properties": {
         "title": { "type": "string" },
@@ -39,11 +39,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": "#/backend/entities/UserProfile",
-      "description": "AUTORISATION : Tout utilisateur authentifié peut créer, lire et modifier son propre profil. L'admin (ndaw22@gmail.com) a un accès complet."
+      "description": "RÈGLES : Tout utilisateur authentifié peut 'write' son propre document si son uid correspond à userId. L'admin a accès à tout."
     },
     "/products/{productId}": {
       "schema": "#/backend/entities/Product",
-      "description": "AUTORISATION : Lecture autorisée pour tous si status == 'active'. Les propriétaires (sellerId == auth.uid) peuvent voir, créer et modifier leurs propres annonces. L'admin (ndaw22@gmail.com) peut voir et valider (status) toutes les annonces."
+      "description": "RÈGLES : Lecture autorisée pour tous si status == 'active'. Les utilisateurs connectés peuvent 'create'. L'auteur (sellerId) peut modifier."
     }
   }
 }

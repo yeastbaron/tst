@@ -12,6 +12,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, Suspense } from 'react';
 import { doc, setDoc } from 'firebase/firestore';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 function LoginContent() {
   const { user, loading } = useUser();
@@ -34,16 +36,27 @@ function LoginContent() {
     try {
       const result = await signInWithPopup(auth, provider);
       
-      // Enregistrer ou mettre à jour le profil utilisateur dans Firestore
-      const userRef = doc(db, 'users', result.user.uid);
-      await setDoc(userRef, {
+      const userData = {
         uid: result.user.uid,
         email: result.user.email,
         displayName: result.user.displayName,
         photoURL: result.user.photoURL,
         role: result.user.email === 'ndaw22@gmail.com' ? 'admin' : 'user',
         lastLogin: new Date().toISOString()
-      }, { merge: true });
+      };
+
+      const userRef = doc(db, 'users', result.user.uid);
+      
+      // Utilisation du pattern non-bloquant pour Firestore
+      setDoc(userRef, userData, { merge: true })
+        .catch(async () => {
+          const permissionError = new FirestorePermissionError({
+            path: userRef.path,
+            operation: 'write',
+            requestResourceData: userData,
+          });
+          errorEmitter.emit('permission-error', permissionError);
+        });
 
       toast({
         title: "Connexion réussie",
@@ -52,17 +65,14 @@ function LoginContent() {
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') return;
       
-      console.error("Erreur de connexion:", error);
-      
       let title = "Erreur d'authentification";
       let message = "Une erreur est survenue lors de la connexion.";
 
       if (error.code === 'auth/configuration-not-found') {
-        message = "La connexion Google n'est pas activée dans la console Firebase (Authentication > Sign-in method).";
+        message = "La connexion Google n'est pas activée dans la console Firebase.";
       } else if (error.code === 'auth/unauthorized-domain') {
-        const domain = typeof window !== 'undefined' ? window.location.hostname : 'ce domaine';
         title = "Domaine non autorisé";
-        message = `Le domaine "${domain}" doit être ajouté dans la console Firebase (Authentication > Settings > Authorized domains).`;
+        message = "Ce domaine doit être ajouté dans la console Firebase.";
       }
 
       toast({

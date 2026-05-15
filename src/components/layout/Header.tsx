@@ -15,6 +15,8 @@ import { doc, setDoc } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,33 +40,37 @@ export function Header() {
   }, []);
 
   const handleLogin = async () => {
-    if (!auth || !db) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Le service n'est pas encore prêt. Veuillez patienter.",
-      });
-      return;
-    }
+    if (!auth || !db) return;
 
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
       
-      // Enregistrer ou mettre à jour le profil utilisateur dans Firestore
-      const userRef = doc(db, 'users', result.user.uid);
-      await setDoc(userRef, {
+      const userData = {
         uid: result.user.uid,
         email: result.user.email,
         displayName: result.user.displayName,
         photoURL: result.user.photoURL,
         role: result.user.email === 'ndaw22@gmail.com' ? 'admin' : 'user',
         lastLogin: new Date().toISOString()
-      }, { merge: true });
+      };
+
+      const userRef = doc(db, 'users', result.user.uid);
+      
+      // Pattern non-bloquant
+      setDoc(userRef, userData, { merge: true })
+        .catch(async () => {
+          const permissionError = new FirestorePermissionError({
+            path: userRef.path,
+            operation: 'write',
+            requestResourceData: userData,
+          });
+          errorEmitter.emit('permission-error', permissionError);
+        });
 
       toast({
         title: "Connexion réussie",
-        description: `Bienvenue sur SalleDeVente.sn, ${result.user.displayName} !`,
+        description: `Bienvenue, ${result.user.displayName} !`,
       });
 
       if (result.user.email === 'ndaw22@gmail.com') {
@@ -72,24 +78,11 @@ export function Header() {
       }
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') return;
-
-      console.error("Erreur de connexion:", error);
       
-      let title = "Erreur d'authentification";
-      let message = "Une erreur est survenue lors de la connexion.";
-
-      if (error.code === 'auth/configuration-not-found') {
-        message = "La connexion Google n'est pas activée dans la console Firebase (Authentication > Sign-in method).";
-      } else if (error.code === 'auth/unauthorized-domain') {
-        const domain = typeof window !== 'undefined' ? window.location.hostname : 'ce domaine';
-        title = "Domaine non autorisé";
-        message = `Le domaine "${domain}" doit être ajouté dans la console Firebase (Authentication > Settings > Authorized domains).`;
-      }
-
       toast({
         variant: "destructive",
-        title: title,
-        description: message,
+        title: "Erreur de connexion",
+        description: "Impossible de se connecter avec Google.",
       });
     }
   };
@@ -100,11 +93,11 @@ export function Header() {
       await signOut(auth);
       toast({
         title: "Déconnexion",
-        description: "À bientôt sur SalleDeVente.sn !",
+        description: "À bientôt !",
       });
       router.push('/');
     } catch (error) {
-      console.error("Erreur de deconnexion:", error);
+      console.error(error);
     }
   };
 
@@ -120,11 +113,9 @@ export function Header() {
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[400px] p-0">
-              <SheetTitle className="sr-only">Menu de navigation</SheetTitle>
-              <SheetDescription className="sr-only">
-                Accédez aux catégories et aux options de vente de SalleDeVente.sn
-              </SheetDescription>
+            <SheetContent side="left" className="w-[300px] p-0">
+              <SheetTitle className="sr-only">Menu</SheetTitle>
+              <SheetDescription className="sr-only">Navigation catégories</SheetDescription>
               <ScrollArea className="h-full px-6 py-8">
                 <nav className="flex flex-col gap-4">
                   <Link href="/" className="text-lg font-bold">Accueil</Link>
@@ -138,13 +129,8 @@ export function Header() {
                   </div>
                   <hr />
                   <Link href="/sell" className="flex items-center gap-2 py-2 text-lg text-primary font-bold">
-                    <PlusCircle className="h-5 w-5" /> Vendre un article
+                    <PlusCircle className="h-5 w-5" /> Vendre
                   </Link>
-                  {isAdmin && (
-                    <Link href="/admin" className="flex items-center gap-2 py-2 text-lg text-secondary font-bold">
-                      <ShieldCheck className="h-5 w-5" /> Administration
-                    </Link>
-                  )}
                 </nav>
               </ScrollArea>
             </SheetContent>
@@ -158,26 +144,14 @@ export function Header() {
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
           <Link href="/products" className="transition-colors hover:text-primary">Acheter</Link>
           <Link href="/sell" className="transition-colors hover:text-primary text-primary font-bold">Vendre</Link>
-          {isAdmin && (
-            <Link href="/admin" className="transition-colors hover:text-secondary text-secondary font-bold flex items-center gap-1">
-              <ShieldCheck className="h-4 w-4" /> Admin
-            </Link>
-          )}
+          {isAdmin && <Link href="/admin" className="text-secondary font-bold">Admin</Link>}
         </nav>
 
         <div className="flex items-center gap-2 md:gap-4 flex-1 justify-end max-w-md">
           <div className="hidden sm:flex flex-1 relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Que cherchez-vous ?"
-              className="pl-9 w-full bg-muted/50 border-none focus-visible:ring-primary"
-            />
+            <Input type="search" placeholder="Rechercher..." className="pl-9 w-full bg-muted/50 border-none" />
           </div>
-          
-          <Button variant="ghost" size="icon" className="sm:hidden" onClick={() => setIsSearchOpen(!isSearchOpen)}>
-            <Search className="h-5 w-5" />
-          </Button>
 
           {mounted && !loading && (
             user ? (
@@ -186,58 +160,28 @@ export function Header() {
                   <Button variant="ghost" size="icon" className="rounded-full">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={user.photoURL || undefined} alt={user.displayName || ''} />
-                      <AvatarFallback className="bg-primary text-primary-foreground font-bold">
+                      <AvatarFallback className="bg-primary text-white">
                         {user.displayName?.charAt(0) || 'U'}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 rounded-xl">
-                  <DropdownMenuLabel className="font-bold">Mon Compte</DropdownMenuLabel>
+                  <DropdownMenuItem asChild><Link href="/profile">Profil</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link href="/my-listings">Mes Annonces</Link></DropdownMenuItem>
+                  {isAdmin && <DropdownMenuItem asChild><Link href="/admin" className="text-secondary font-bold">Administration</Link></DropdownMenuItem>}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile" className="cursor-pointer font-medium">Profil</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/my-listings" className="cursor-pointer font-medium">Mes Annonces</Link>
-                  </DropdownMenuItem>
-                  {isAdmin && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link href="/admin" className="cursor-pointer font-bold text-secondary flex items-center gap-2">
-                          <ShieldCheck className="h-4 w-4" /> Administration
-                        </Link>
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-destructive font-bold cursor-pointer">
-                    <LogOut className="h-4 w-4 mr-2" /> Se déconnecter
-                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout} className="text-destructive font-bold">Déconnexion</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button onClick={handleLogin} variant="secondary" className="rounded-full font-bold gap-2 bg-secondary text-secondary-foreground">
-                <LogIn className="h-4 w-4" /> <span className="hidden sm:inline">Se connecter</span>
+              <Button onClick={handleLogin} variant="secondary" className="rounded-full font-bold">
+                Connexion
               </Button>
             )
           )}
         </div>
       </div>
-      
-      {isSearchOpen && (
-        <div className="md:hidden border-t p-2 bg-background animate-in slide-in-from-top duration-200">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              autoFocus
-              placeholder="Ex: iPhone 13 d'occasion..."
-              className="pl-10 h-10 w-full"
-            />
-          </div>
-        </div>
-      )}
     </header>
   );
 }
