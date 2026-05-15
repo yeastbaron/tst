@@ -45,9 +45,9 @@ function LoginContent() {
         lastLogin: new Date().toISOString()
       };
 
+      // TRÈS IMPORTANT : L'ID du document doit être le UID de l'utilisateur
       const userRef = doc(db, 'users', result.user.uid);
       
-      // Utilisation du pattern non-bloquant pour Firestore
       setDoc(userRef, userData, { merge: true })
         .catch(async () => {
           const permissionError = new FirestorePermissionError({
@@ -65,20 +65,10 @@ function LoginContent() {
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') return;
       
-      let title = "Erreur d'authentification";
-      let message = "Une erreur est survenue lors de la connexion.";
-
-      if (error.code === 'auth/configuration-not-found') {
-        message = "La connexion Google n'est pas activée dans la console Firebase.";
-      } else if (error.code === 'auth/unauthorized-domain') {
-        title = "Domaine non autorisé";
-        message = "Ce domaine doit être ajouté dans la console Firebase.";
-      }
-
       toast({
         variant: "destructive",
-        title: title,
-        description: message,
+        title: "Erreur d'authentification",
+        description: "Une erreur est survenue lors de la connexion avec Google.",
       });
     }
   };
@@ -104,7 +94,7 @@ function LoginContent() {
           <div className="space-y-2">
             <h1 className="text-3xl font-black uppercase tracking-tight text-primary">Connexion</h1>
             <p className="text-muted-foreground font-medium px-4">
-              Connectez-vous avec votre compte Google pour accéder à cet espace et gérer vos annonces en toute sécurité.
+              Accédez à votre espace sécurisé pour gérer vos annonces.
             </p>
           </div>
         </div>

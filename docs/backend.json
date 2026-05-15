@@ -17,7 +17,7 @@
     },
     "Product": {
       "title": "Produit",
-      "description": "Annonce produit. Lecture publique si actif. Création autorisée pour tout utilisateur connecté.",
+      "description": "Annonce produit. Lecture publique si actif.",
       "type": "object",
       "properties": {
         "title": { "type": "string" },
