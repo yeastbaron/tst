@@ -9,8 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { CATEGORIES } from '@/lib/constants';
-import { useUser, useAuth } from '@/firebase';
+import { useUser, useAuth, useFirestore } from '@/firebase';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
@@ -28,6 +29,7 @@ export function Header() {
   const [mounted, setMounted] = useState(false);
   const { user, loading } = useUser();
   const auth = useAuth();
+  const db = useFirestore();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -36,11 +38,11 @@ export function Header() {
   }, []);
 
   const handleLogin = async () => {
-    if (!auth) {
+    if (!auth || !db) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Le service d'authentification n'est pas encore prêt. Veuillez patienter ou vérifier votre configuration.",
+        description: "Le service n'est pas encore prêt. Veuillez patienter.",
       });
       return;
     }
@@ -48,20 +50,28 @@ export function Header() {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
+      
+      // Enregistrer ou mettre à jour le profil utilisateur dans Firestore
+      const userRef = doc(db, 'users', result.user.uid);
+      await setDoc(userRef, {
+        uid: result.user.uid,
+        email: result.user.email,
+        displayName: result.user.displayName,
+        photoURL: result.user.photoURL,
+        role: result.user.email === 'ndaw22@gmail.com' ? 'admin' : 'user',
+        lastLogin: new Date().toISOString()
+      }, { merge: true });
+
       toast({
         title: "Connexion réussie",
         description: `Bienvenue sur SalleDeVente.sn, ${result.user.displayName} !`,
       });
 
-      // Redirection automatique pour l'admin
       if (result.user.email === 'ndaw22@gmail.com') {
         router.push('/admin');
       }
     } catch (error: any) {
-      // Ignorer l'erreur si l'utilisateur ferme simplement la popup
-      if (error.code === 'auth/popup-closed-by-user') {
-        return;
-      }
+      if (error.code === 'auth/popup-closed-by-user') return;
 
       console.error("Erreur de connexion:", error);
       
@@ -74,8 +84,6 @@ export function Header() {
         const domain = typeof window !== 'undefined' ? window.location.hostname : 'ce domaine';
         title = "Domaine non autorisé";
         message = `Le domaine "${domain}" doit être ajouté dans la console Firebase (Authentication > Settings > Authorized domains).`;
-      } else if (error.code === 'auth/popup-blocked') {
-        message = "La fenêtre de connexion a été bloquée par votre navigateur.";
       }
 
       toast({
@@ -96,7 +104,7 @@ export function Header() {
       });
       router.push('/');
     } catch (error) {
-      console.error("Erreur de déconnexion:", error);
+      console.error("Erreur de deconnexion:", error);
     }
   };
 
@@ -105,7 +113,6 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
-        {/* Mobile Menu */}
         {mounted && (
           <Sheet>
             <SheetTrigger asChild>
@@ -144,12 +151,10 @@ export function Header() {
           </Sheet>
         )}
 
-        {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
           <span className="text-2xl font-bold tracking-tighter text-primary">SalleDeVente.sn</span>
         </Link>
 
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
           <Link href="/products" className="transition-colors hover:text-primary">Acheter</Link>
           <Link href="/sell" className="transition-colors hover:text-primary text-primary font-bold">Vendre</Link>
@@ -160,7 +165,6 @@ export function Header() {
           )}
         </nav>
 
-        {/* Search & User Actions */}
         <div className="flex items-center gap-2 md:gap-4 flex-1 justify-end max-w-md">
           <div className="hidden sm:flex flex-1 relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -222,7 +226,6 @@ export function Header() {
         </div>
       </div>
       
-      {/* Mobile Search Overlay */}
       {isSearchOpen && (
         <div className="md:hidden border-t p-2 bg-background animate-in slide-in-from-top duration-200">
           <div className="relative">

@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CATEGORIES, COMMISSION_RATE } from '@/lib/constants';
-import { Camera, X, Loader2 } from 'lucide-react';
+import { Camera, X, Loader2, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useUser } from '@/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -44,6 +44,9 @@ export default function SellPage() {
     if (e.target.files) {
       const files = Array.from(e.target.files).slice(0, 10 - images.length);
       files.forEach(file => {
+        // Validation simple du type de fichier
+        if (!file.type.startsWith('image/')) return;
+        
         const reader = new FileReader();
         reader.onloadend = () => {
           setImages(prev => [...prev, reader.result as string]);
@@ -59,7 +62,23 @@ export default function SellPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !db) return;
+    if (!user || !db) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Vous devez être connecté et la base de données doit être prête.",
+      });
+      return;
+    }
+
+    if (images.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Photos manquantes",
+        description: "Veuillez ajouter au moins une photo de votre article.",
+      });
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -75,8 +94,6 @@ export default function SellPage() {
       createdAt: serverTimestamp(),
     };
 
-    // Note: We don't await the promise here to allow optimistic UI,
-    // but we handle success/error via callbacks.
     addDoc(collection(db, 'products'), productData)
       .then(() => {
         toast({
@@ -87,6 +104,8 @@ export default function SellPage() {
       })
       .catch(async (error) => {
         setIsSubmitting(false);
+        console.error("Erreur lors de la publication:", error);
+        
         const permissionError = new FirestorePermissionError({
           path: 'products',
           operation: 'create',
@@ -120,7 +139,10 @@ export default function SellPage() {
 
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="space-y-4">
-                <Label className="text-lg font-bold">Photos (Max 10)</Label>
+                <div className="flex items-center justify-between">
+                  <Label className="text-lg font-bold">Photos (Max 10)</Label>
+                  <span className="text-xs text-muted-foreground font-medium">{images.length}/10</span>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                   {images.map((img, i) => (
                     <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-muted group">
@@ -137,11 +159,16 @@ export default function SellPage() {
                   {images.length < 10 && (
                     <label className="aspect-square border-2 border-dashed border-muted-foreground/20 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all">
                       <Camera className="h-8 w-8 text-muted-foreground mb-2" />
-                      <span className="text-[10px] font-bold uppercase text-muted-foreground text-center px-2">Ajouter des photos</span>
+                      <span className="text-[10px] font-bold uppercase text-muted-foreground text-center px-2">Ajouter</span>
                       <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageUpload} />
                     </label>
                   )}
                 </div>
+                {images.length === 0 && (
+                  <div className="flex items-center gap-2 text-destructive text-xs font-bold uppercase">
+                    <AlertCircle className="h-4 w-4" /> Au moins une photo requise
+                  </div>
+                )}
               </div>
 
               <div className="space-y-6">
@@ -206,6 +233,7 @@ export default function SellPage() {
                     <Input 
                       id="price" 
                       type="number" 
+                      min="100"
                       placeholder="0" 
                       className="h-16 text-3xl font-black pl-4 pr-16 bg-white border-primary/20 focus-visible:ring-secondary" 
                       value={price}
@@ -240,7 +268,7 @@ export default function SellPage() {
                 {isSubmitting ? (
                   <div className="flex items-center gap-2">
                     <Loader2 className="h-6 w-6 animate-spin" />
-                    Envoi en cours...
+                    Publication...
                   </div>
                 ) : (
                   "Publier mon annonce"
