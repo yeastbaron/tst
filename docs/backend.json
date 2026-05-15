@@ -1,0 +1,49 @@
+
+{
+  "entities": {
+    "UserProfile": {
+      "title": "Profil Utilisateur",
+      "description": "Données spécifiques à l'utilisateur et rôles.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] }
+      },
+      "required": ["uid", "email"]
+    },
+    "Product": {
+      "title": "Produit",
+      "description": "Annonce d'un produit dans la marketplace.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "basePrice": { "type": "number" },
+        "condition": { "type": "string", "enum": ["new", "used", "refurbished"] },
+        "category": { "type": "string" },
+        "images": { "type": "array", "items": { "type": "string" } },
+        "sellerId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "active", "sold", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "basePrice", "sellerId", "status"]
+    }
+  },
+  "auth": {
+    "providers": ["google.com"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "#/backend/entities/UserProfile",
+      "description": "Collection des profils utilisateurs."
+    },
+    "/products/{productId}": {
+      "schema": "#/backend/entities/Product",
+      "description": "Collection de toutes les annonces de produits."
+    }
+  }
+}
