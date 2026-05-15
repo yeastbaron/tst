@@ -34,23 +34,41 @@ export function Header() {
   }, []);
 
   const handleLogin = async () => {
-    if (!auth) return;
+    if (!auth) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Le service d'authentification n'est pas encore prêt. Veuillez patienter ou vérifier votre configuration.",
+      });
+      return;
+    }
+
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
+      toast({
+        title: "Connexion réussie",
+        description: "Bienvenue sur SalleDeVente.sn !",
+      });
     } catch (error: any) {
       console.error("Erreur de connexion:", error);
       
+      let title = "Erreur d'authentification";
       let message = "Une erreur est survenue lors de la connexion.";
+
       if (error.code === 'auth/configuration-not-found') {
-        message = "La connexion Google n'est pas encore activée dans la console Firebase (Authentication > Sign-in method).";
+        message = "La connexion Google n'est pas activée dans la console Firebase (Authentication > Sign-in method).";
       } else if (error.code === 'auth/unauthorized-domain') {
-        message = "Ce domaine n'est pas autorisé. Ajoutez l'URL actuelle dans la console Firebase (Authentication > Settings > Authorized domains).";
+        const domain = typeof window !== 'undefined' ? window.location.hostname : 'ce domaine';
+        title = "Domaine non autorisé";
+        message = `Le domaine "${domain}" doit être ajouté dans la console Firebase (Authentication > Settings > Authorized domains).`;
+      } else if (error.code === 'auth/popup-blocked') {
+        message = "La fenêtre de connexion a été bloquée par votre navigateur.";
       }
 
       toast({
         variant: "destructive",
-        title: "Erreur d'authentification",
+        title: title,
         description: message,
       });
     }
@@ -60,6 +78,10 @@ export function Header() {
     if (!auth) return;
     try {
       await signOut(auth);
+      toast({
+        title: "Déconnexion",
+        description: "À bientôt sur SalleDeVente.sn !",
+      });
     } catch (error) {
       console.error("Erreur de déconnexion:", error);
     }
