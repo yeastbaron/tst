@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CATEGORIES, COMMISSION_RATE } from '@/lib/constants';
-import { Camera, X, Loader2, AlertCircle } from 'lucide-react';
+import { Camera, X, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useUser } from '@/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -59,7 +59,7 @@ export default function SellPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || !db) return;
 
     setIsSubmitting(true);
 
@@ -75,6 +75,8 @@ export default function SellPage() {
       createdAt: serverTimestamp(),
     };
 
+    // Note: We don't await the promise here to allow optimistic UI,
+    // but we handle success/error via callbacks.
     addDoc(collection(db, 'products'), productData)
       .then(() => {
         toast({
@@ -84,13 +86,13 @@ export default function SellPage() {
         router.push('/my-listings');
       })
       .catch(async (error) => {
+        setIsSubmitting(false);
         const permissionError = new FirestorePermissionError({
           path: 'products',
           operation: 'create',
           requestResourceData: productData,
         });
         errorEmitter.emit('permission-error', permissionError);
-        setIsSubmitting(false);
       });
   };
 
@@ -235,8 +237,14 @@ export default function SellPage() {
                 disabled={isSubmitting}
                 className="w-full h-16 text-xl font-black uppercase rounded-2xl bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-xl shadow-secondary/20"
               >
-                {isSubmitting ? <Loader2 className="h-6 w-6 animate-spin mr-2" /> : null}
-                Publier mon annonce
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                    Envoi en cours...
+                  </div>
+                ) : (
+                  "Publier mon annonce"
+                )}
               </Button>
             </form>
           </div>
