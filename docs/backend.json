@@ -39,11 +39,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": "#/backend/entities/UserProfile",
-      "description": "RÈGLES : Tout utilisateur authentifié peut 'write' son propre document si son uid correspond à userId. L'admin a accès à tout."
+      "description": "ALLOW READ, WRITE: if request.auth.uid == userId || request.auth.token.email == 'ndaw22@gmail.com'"
     },
     "/products/{productId}": {
       "schema": "#/backend/entities/Product",
-      "description": "RÈGLES : Lecture autorisée pour tous si status == 'active'. Les utilisateurs connectés peuvent 'create'. L'auteur (sellerId) peut modifier."
+      "description": "ALLOW READ: if resource.data.status == 'active' || request.auth.uid == resource.data.sellerId || request.auth.token.email == 'ndaw22@gmail.com'; ALLOW CREATE: if request.auth != null; ALLOW UPDATE, DELETE: if request.auth.uid == resource.data.sellerId || request.auth.token.email == 'ndaw22@gmail.com'"
     }
   }
 }
