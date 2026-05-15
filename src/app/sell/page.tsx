@@ -10,18 +10,29 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CATEGORIES, COMMISSION_RATE } from '@/lib/constants';
-import { Camera, Image as ImageIcon, X, Loader2, Sparkles } from 'lucide-react';
+import { Camera, X, Loader2, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { autoProductListing } from '@/ai/flows/auto-product-listing-flow';
+import { useFirestore, useUser } from '@/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 export default function SellPage() {
   const { toast } = useToast();
+  const router = useRouter();
+  const { user } = useUser();
+  const db = useFirestore();
+  
   const [images, setImages] = useState<string[]>([]);
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState<string>('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
+  const [condition, setCondition] = useState('used');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const buyerPrice = price ? Math.ceil(parseFloat(price) * (1 + COMMISSION_RATE)) : 0;
 
@@ -59,7 +70,6 @@ export default function SellPage() {
         photoDataUris: images
       });
       setDescription(result.description);
-      // Try to match the first suggested category
       if (result.suggestedCategories.length > 0) {
         const suggested = result.suggestedCategories[0].toLowerCase();
         const found = CATEGORIES.find(c => suggested.includes(c.name.toLowerCase()));
@@ -80,12 +90,48 @@ export default function SellPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Annonce soumise !",
-      description: "Notre équipe va valider votre article sous 24h.",
-    });
+    if (!user) {
+      toast({
+        title: "Connexion requise",
+        description: "Veuillez vous connecter pour publier une annonce.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const productData = {
+      title,
+      description,
+      basePrice: parseFloat(price),
+      category,
+      condition,
+      images,
+      sellerId: user.uid,
+      status: 'pending',
+      createdAt: serverTimestamp(),
+    };
+
+    addDoc(collection(db, 'products'), productData)
+      .then(() => {
+        toast({
+          title: "Annonce soumise !",
+          description: "Notre équipe va valider votre article sous 24h.",
+        });
+        router.push('/');
+      })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: 'products',
+          operation: 'create',
+          requestResourceData: productData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        setIsSubmitting(false);
+      });
   };
 
   return (
@@ -101,7 +147,6 @@ export default function SellPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Image Upload */}
               <div className="space-y-4">
                 <Label className="text-lg font-bold">Photos (Max 10)</Label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
@@ -127,7 +172,6 @@ export default function SellPage() {
                 </div>
               </div>
 
-              {/* Basic Info */}
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="title" className="text-sm font-black uppercase tracking-wider">Titre de l&apos;annonce</Label>
@@ -157,7 +201,7 @@ export default function SellPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="condition" className="text-sm font-black uppercase tracking-wider">État</Label>
-                    <Select defaultValue="used">
+                    <Select value={condition} onValueChange={setCondition}>
                       <SelectTrigger id="condition" className="h-12 font-medium">
                         <SelectValue placeholder="État du produit" />
                       </SelectTrigger>
@@ -196,7 +240,6 @@ export default function SellPage() {
                 </div>
               </div>
 
-              {/* Pricing Section */}
               <div className="p-6 bg-primary/5 rounded-2xl border border-primary/10 space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="price" className="text-sm font-black uppercase tracking-wider text-primary">Votre prix de vente (FCFA)</Label>
@@ -229,7 +272,13 @@ export default function SellPage() {
                 </div>
               </div>
 
-              <Button type="submit" size="lg" className="w-full h-16 text-xl font-black uppercase rounded-2xl bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-xl shadow-secondary/20">
+              <Button 
+                type="submit" 
+                size="lg" 
+                disabled={isSubmitting}
+                className="w-full h-16 text-xl font-black uppercase rounded-2xl bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-xl shadow-secondary/20"
+              >
+                {isSubmitting ? <Loader2 className="h-6 w-6 animate-spin mr-2" /> : null}
                 Publier mon annonce
               </Button>
             </form>
