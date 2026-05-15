@@ -12,6 +12,7 @@ import { CATEGORIES } from '@/lib/constants';
 import { useUser, useAuth } from '@/firebase';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useToast } from '@/hooks/use-toast';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +27,7 @@ export function Header() {
   const [mounted, setMounted] = useState(false);
   const { user, loading } = useUser();
   const auth = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
     setMounted(true);
@@ -36,8 +38,19 @@ export function Header() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erreur de connexion:", error);
+      
+      let message = "Une erreur est survenue lors de la connexion.";
+      if (error.code === 'auth/configuration-not-found') {
+        message = "La connexion Google n'est pas encore activée dans la console Firebase.";
+      }
+
+      toast({
+        variant: "destructive",
+        title: "Erreur d'authentification",
+        description: message,
+      });
     }
   };
 
