@@ -13,6 +13,7 @@ import { useUser, useAuth } from '@/firebase';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +29,7 @@ export function Header() {
   const { user, loading } = useUser();
   const auth = useAuth();
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -45,11 +47,16 @@ export function Header() {
 
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
       toast({
         title: "Connexion réussie",
-        description: "Bienvenue sur SalleDeVente.sn !",
+        description: `Bienvenue sur SalleDeVente.sn, ${result.user.displayName} !`,
       });
+
+      // Redirection automatique pour l'admin
+      if (result.user.email === 'ndaw22@gmail.com') {
+        router.push('/admin');
+      }
     } catch (error: any) {
       console.error("Erreur de connexion:", error);
       
@@ -82,6 +89,7 @@ export function Header() {
         title: "Déconnexion",
         description: "À bientôt sur SalleDeVente.sn !",
       });
+      router.push('/');
     } catch (error) {
       console.error("Erreur de déconnexion:", error);
     }
@@ -184,6 +192,16 @@ export function Header() {
                   <DropdownMenuItem asChild>
                     <Link href="/my-listings" className="cursor-pointer font-medium">Mes Annonces</Link>
                   </DropdownMenuItem>
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin" className="cursor-pointer font-bold text-secondary flex items-center gap-2">
+                          <ShieldCheck className="h-4 w-4" /> Administration
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="text-destructive font-bold cursor-pointer">
                     <LogOut className="h-4 w-4 mr-2" /> Se déconnecter
