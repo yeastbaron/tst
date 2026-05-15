@@ -52,10 +52,23 @@ function LoginContent() {
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') return;
       
+      console.error("Erreur de connexion:", error);
+      
+      let title = "Erreur d'authentification";
+      let message = "Une erreur est survenue lors de la connexion.";
+
+      if (error.code === 'auth/configuration-not-found') {
+        message = "La connexion Google n'est pas activée dans la console Firebase (Authentication > Sign-in method).";
+      } else if (error.code === 'auth/unauthorized-domain') {
+        const domain = typeof window !== 'undefined' ? window.location.hostname : 'ce domaine';
+        title = "Domaine non autorisé";
+        message = `Le domaine "${domain}" doit être ajouté dans la console Firebase (Authentication > Settings > Authorized domains).`;
+      }
+
       toast({
         variant: "destructive",
-        title: "Erreur de connexion",
-        description: "Une erreur est survenue lors de la connexion avec Google.",
+        title: title,
+        description: message,
       });
     }
   };

@@ -39,11 +39,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": "#/backend/entities/UserProfile",
-      "description": "LECTURE/ÉCRITURE : Tout utilisateur authentifié peut créer/lire son propre profil. L'admin (ndaw22@gmail.com) a un accès complet en lecture et écriture."
+      "description": "AUTORISATION : Tout utilisateur authentifié peut créer, lire et modifier son propre profil. L'admin (ndaw22@gmail.com) a un accès complet."
     },
     "/products/{productId}": {
       "schema": "#/backend/entities/Product",
-      "description": "ACCÈS PUBLIC : Lecture autorisée pour tous si status == 'active'. ACCÈS PRIVÉ : Les propriétaires (sellerId == auth.uid) peuvent tout faire sur leurs produits. ADMIN : L'admin (ndaw22@gmail.com) peut lire, lister et modifier (status) tous les produits."
+      "description": "AUTORISATION : Lecture autorisée pour tous si status == 'active'. Les propriétaires (sellerId == auth.uid) peuvent voir, créer et modifier leurs propres annonces. L'admin (ndaw22@gmail.com) peut voir et valider (status) toutes les annonces."
     }
   }
 }
