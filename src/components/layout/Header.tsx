@@ -43,7 +43,9 @@ export function Header() {
       
       let message = "Une erreur est survenue lors de la connexion.";
       if (error.code === 'auth/configuration-not-found') {
-        message = "La connexion Google n'est pas encore activée dans la console Firebase.";
+        message = "La connexion Google n'est pas encore activée dans la console Firebase (Authentication > Sign-in method).";
+      } else if (error.code === 'auth/unauthorized-domain') {
+        message = "Ce domaine n'est pas autorisé. Ajoutez l'URL actuelle dans la console Firebase (Authentication > Settings > Authorized domains).";
       }
 
       toast({
