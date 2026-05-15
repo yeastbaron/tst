@@ -1,3 +1,40 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "electronics",
+      "description": "Latest smartphones and laptops",
+      "imageUrl": "https://picsum.photos/seed/elec1/800/600",
+      "imageHint": "smartphone laptop"
+    },
+    {
+      "id": "fashion",
+      "description": "Trendy clothes and accessories",
+      "imageUrl": "https://picsum.photos/seed/fash1/800/600",
+      "imageHint": "clothing fashion"
+    },
+    {
+      "id": "furniture",
+      "description": "Modern home furniture",
+      "imageUrl": "https://picsum.photos/seed/furn1/800/600",
+      "imageHint": "furniture interior"
+    },
+    {
+      "id": "cars",
+      "description": "Quality used vehicles",
+      "imageUrl": "https://picsum.photos/seed/car1/800/600",
+      "imageHint": "car vehicle"
+    },
+    {
+      "id": "appliances",
+      "description": "Home and kitchen appliances",
+      "imageUrl": "https://picsum.photos/seed/app1/800/600",
+      "imageHint": "refrigerator kitchen"
+    },
+    {
+      "id": "watch",
+      "description": "Elegant wrist watches",
+      "imageUrl": "https://picsum.photos/seed/watch1/800/600",
+      "imageHint": "watch luxury"
+    }
+  ]
 }
