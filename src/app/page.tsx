@@ -6,6 +6,7 @@ import { CATEGORIES } from '@/lib/constants';
 import { ProductCard } from '@/components/products/ProductCard';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, Zap, ShieldCheck, Truck } from 'lucide-react';
 
 export default function Home() {
@@ -76,19 +77,27 @@ export default function Home() {
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between mb-10">
-              <h2 className="text-3xl font-black tracking-tight">PARCOURIR LES CATÉGORIES</h2>
+              <h2 className="text-3xl font-black tracking-tight uppercase">Parcourir les catégories</h2>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-6">
               {CATEGORIES.map((cat) => (
                 <Link 
                   key={cat.id} 
                   href={`/products?category=${cat.id}`}
-                  className="group flex flex-col items-center p-6 rounded-2xl bg-white border border-border/50 hover:border-primary/30 hover:shadow-lg transition-all text-center"
+                  className="group flex flex-col items-center"
                 >
-                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4 group-hover:bg-primary/10 transition-colors">
-                    <span className="text-primary font-bold text-xs uppercase">{cat.id.slice(0,3)}</span>
+                  <div className="relative w-full aspect-square rounded-[2rem] overflow-hidden bg-white border border-border/50 hover:border-primary/30 hover:shadow-xl transition-all mb-4">
+                    <Image 
+                      src={cat.image || 'https://picsum.photos/seed/placeholder/200/200'} 
+                      alt={cat.name}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      sizes="(max-width: 768px) 50vw, 15vw"
+                      data-ai-hint={cat.id === 'electronics' ? 'smartphone laptop' : cat.id === 'fashion' ? 'fashion clothing' : 'product category'}
+                    />
+                    <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors" />
                   </div>
-                  <span className="font-bold text-sm tracking-tight">{cat.name}</span>
+                  <span className="font-bold text-sm tracking-tight text-center uppercase group-hover:text-primary transition-colors">{cat.name}</span>
                 </Link>
               ))}
             </div>
@@ -123,8 +132,8 @@ export default function Home() {
                 <p className="text-lg font-medium opacity-90">
                   Vendez vos articles d&apos;occasion en quelques clics. Nous ajoutons une marge de 10% et nous nous occupons du reste.
                 </p>
-                <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 h-14 px-8 text-lg font-bold rounded-xl">
-                  Commencer à vendre
+                <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 h-14 px-8 text-lg font-bold rounded-xl" asChild>
+                  <Link href="/sell">Commencer à vendre</Link>
                 </Button>
               </div>
               <div className="w-full md:w-1/3 aspect-square bg-white/20 rounded-full blur-3xl absolute -bottom-24 -right-24" />

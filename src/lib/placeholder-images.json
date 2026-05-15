@@ -13,7 +13,7 @@
       "imageHint": "clothing fashion"
     },
     {
-      "id": "furniture",
+      "id": "home",
       "description": "Modern home furniture",
       "imageUrl": "https://picsum.photos/seed/furn1/800/600",
       "imageHint": "furniture interior"
@@ -25,16 +25,22 @@
       "imageHint": "car vehicle"
     },
     {
-      "id": "appliances",
-      "description": "Home and kitchen appliances",
-      "imageUrl": "https://picsum.photos/seed/app1/800/600",
-      "imageHint": "refrigerator kitchen"
+      "id": "beauty",
+      "description": "Beauty and wellness products",
+      "imageUrl": "https://picsum.photos/seed/beauty1/800/600",
+      "imageHint": "cosmetics beauty"
     },
     {
-      "id": "watch",
-      "description": "Elegant wrist watches",
-      "imageUrl": "https://picsum.photos/seed/watch1/800/600",
-      "imageHint": "watch luxury"
+      "id": "sports",
+      "description": "Sports and fitness gear",
+      "imageUrl": "https://picsum.photos/seed/sports1/800/600",
+      "imageHint": "fitness sports"
+    },
+    {
+      "id": "pro",
+      "description": "Professional tools and equipment",
+      "imageUrl": "https://picsum.photos/seed/pro1/800/600",
+      "imageHint": "tools industrial"
     }
   ]
 }
