@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { Search, PlusCircle, User, Menu, X, LogIn, LogOut, ShieldCheck } from 'lucide-react';
+import { Search, PlusCircle, Menu, X, LogIn, LogOut, ShieldCheck } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,13 +21,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 export function Header() {
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { user, loading } = useUser();
   const auth = useAuth();
@@ -57,7 +55,6 @@ export function Header() {
 
       const userRef = doc(db, 'users', result.user.uid);
       
-      // Pattern non-bloquant
       setDoc(userRef, userData, { merge: true })
         .catch(async () => {
           const permissionError = new FirestorePermissionError({

@@ -39,7 +39,7 @@
   "firestore": {
     "/users/{userId}": {
       "schema": "#/backend/entities/UserProfile",
-      "description": "ALLOW READ, WRITE: if request.auth.uid == userId || request.auth.token.email == 'ndaw22@gmail.com'"
+      "description": "ALLOW READ, WRITE: if request.auth != null && (request.auth.uid == userId || request.auth.token.email == 'ndaw22@gmail.com')"
     },
     "/products/{productId}": {
       "schema": "#/backend/entities/Product",
