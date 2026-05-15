@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { CATEGORIES } from '@/lib/constants';
 
 export function Header() {
@@ -22,26 +23,28 @@ export function Header() {
               <Menu className="h-6 w-6" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+          <SheetContent side="left" className="w-[300px] sm:w-[400px] p-0">
             <SheetTitle className="sr-only">Menu de navigation</SheetTitle>
             <SheetDescription className="sr-only">
               Accédez aux catégories et aux options de vente de SalleDeVente.sn
             </SheetDescription>
-            <nav className="flex flex-col gap-4 mt-8">
-              <Link href="/" className="text-lg font-bold">Accueil</Link>
-              <div className="space-y-2">
-                <p className="font-semibold text-muted-foreground uppercase text-xs">Catégories</p>
-                {CATEGORIES.map((cat) => (
-                  <Link key={cat.id} href={`/products?category=${cat.id}`} className="block py-2 text-lg">
-                    {cat.name}
-                  </Link>
-                ))}
-              </div>
-              <hr />
-              <Link href="/sell" className="flex items-center gap-2 py-2 text-lg text-primary font-bold">
-                <PlusCircle className="h-5 w-5" /> Vendre un article
-              </Link>
-            </nav>
+            <ScrollArea className="h-full px-6 py-8">
+              <nav className="flex flex-col gap-4">
+                <Link href="/" className="text-lg font-bold">Accueil</Link>
+                <div className="space-y-2">
+                  <p className="font-semibold text-muted-foreground uppercase text-xs">Catégories</p>
+                  {CATEGORIES.map((cat) => (
+                    <Link key={cat.id} href={`/products?category=${cat.id}`} className="block py-2 text-lg">
+                      {cat.name}
+                    </Link>
+                  ))}
+                </div>
+                <hr />
+                <Link href="/sell" className="flex items-center gap-2 py-2 text-lg text-primary font-bold">
+                  <PlusCircle className="h-5 w-5" /> Vendre un article
+                </Link>
+              </nav>
+            </ScrollArea>
           </SheetContent>
         </Sheet>
 
