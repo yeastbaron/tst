@@ -1,25 +1,38 @@
 
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
+import { getFirestore, Firestore } from 'firebase/firestore';
+import { getAuth, Auth } from 'firebase/auth';
 import { firebaseConfig } from './config';
 
 export function initializeFirebase() {
-  // On vérifie si une application est déjà initialisée
-  const existingApp = getApps().length > 0 ? getApp() : null;
-  
-  // Si aucune application n'existe et que la config est invalide, on ne peut pas continuer proprement
-  if (!existingApp && !firebaseConfig.apiKey) {
-    console.warn("Firebase: Configuration manquante ou clé API invalide. Vérifiez vos variables d'environnement.");
-    // On initialise quand même pour éviter des crashs immédiats de hooks, 
-    // mais les appels aux services échoueront de manière plus contrôlée
-  }
+  try {
+    // On vérifie si une application est déjà initialisée
+    const existingApp = getApps().length > 0 ? getApp() : null;
+    
+    // Si aucune application n'existe et que la clé API est vide, on ne peut pas initialiser Firebase proprement
+    if (!existingApp && (!firebaseConfig.apiKey || firebaseConfig.apiKey === "")) {
+      console.warn("Firebase: La clé API est manquante. L'authentification et Firestore ne fonctionneront pas tant que vous n'aurez pas configuré votre projet dans la console Firebase.");
+      // On retourne des nulls castés pour satisfaire les types sans faire planter l'initialisation
+      return { 
+        app: null as unknown as FirebaseApp, 
+        db: null as unknown as Firestore, 
+        auth: null as unknown as Auth 
+      };
+    }
 
-  const app = existingApp || initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
-  
-  return { app, db, auth };
+    const app = existingApp || initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    
+    return { app, db, auth };
+  } catch (error) {
+    console.error("Erreur critique lors de l'initialisation de Firebase:", error);
+    return { 
+      app: null as unknown as FirebaseApp, 
+      db: null as unknown as Firestore, 
+      auth: null as unknown as Auth 
+    };
+  }
 }
 
 export * from './provider';

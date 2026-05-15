@@ -13,7 +13,14 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     setServices(initializeFirebase());
   }, []);
 
+  // Si Firebase n'est pas encore initialisé (pendant le montage), on ne rend rien
   if (!services) return null;
+
+  // Si les services sont null (config manquante), on rend quand même les enfants 
+  // mais les fonctionnalités Firebase seront inactives/échoueront silencieusement
+  if (!services.app) {
+    return <>{children}</>;
+  }
 
   return (
     <FirebaseProvider app={services.app} db={services.db} auth={services.auth}>
