@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useAuth, useUser } from '@/firebase';
+import { useAuth, useUser, useFirestore } from '@/firebase';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
@@ -11,10 +11,12 @@ import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, Suspense } from 'react';
+import { doc, setDoc } from 'firebase/firestore';
 
 function LoginContent() {
   const { user, loading } = useUser();
   const auth = useAuth();
+  const db = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
   const searchParams = useSearchParams();
@@ -27,10 +29,22 @@ function LoginContent() {
   }, [user, loading, router, redirectTo]);
 
   const handleLogin = async () => {
-    if (!auth) return;
+    if (!auth || !db) return;
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
+      
+      // Enregistrer ou mettre à jour le profil utilisateur dans Firestore
+      const userRef = doc(db, 'users', result.user.uid);
+      await setDoc(userRef, {
+        uid: result.user.uid,
+        email: result.user.email,
+        displayName: result.user.displayName,
+        photoURL: result.user.photoURL,
+        role: result.user.email === 'ndaw22@gmail.com' ? 'admin' : 'user',
+        lastLogin: new Date().toISOString()
+      }, { merge: true });
+
       toast({
         title: "Connexion réussie",
         description: `Bienvenue sur SalleDeVente.sn, ${result.user.displayName} !`,

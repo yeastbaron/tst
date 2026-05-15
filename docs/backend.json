@@ -10,7 +10,8 @@
         "email": { "type": "string" },
         "displayName": { "type": "string" },
         "photoURL": { "type": "string" },
-        "role": { "type": "string", "enum": ["user", "admin"] }
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "lastLogin": { "type": "string" }
       },
       "required": ["uid", "email"]
     },
@@ -38,11 +39,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": "#/backend/entities/UserProfile",
-      "description": "LECTURE/ÉCRITURE : Autorisé uniquement pour le propriétaire du compte (userId == auth.uid) ou l'administrateur (ndaw22@gmail.com)."
+      "description": "LECTURE/ÉCRITURE : Tout utilisateur authentifié peut créer/lire son propre profil. L'admin (ndaw22@gmail.com) a un accès complet en lecture et écriture."
     },
     "/products/{productId}": {
       "schema": "#/backend/entities/Product",
-      "description": "LECTURE : Accès public autorisé pour tous si status == 'active'. Les propriétaires (sellerId == auth.uid) peuvent lire leurs propres annonces quel que soit le statut. L'administrateur (ndaw22@gmail.com) peut lire toutes les annonces. ÉCRITURE : Création autorisée pour tout utilisateur authentifié. Mise à jour et suppression autorisées uniquement pour le propriétaire de l'annonce (sellerId == auth.uid) ou l'administrateur (ndaw22@gmail.com)."
+      "description": "ACCÈS PUBLIC : Lecture autorisée pour tous si status == 'active'. ACCÈS PRIVÉ : Les propriétaires (sellerId == auth.uid) peuvent tout faire sur leurs produits. ADMIN : L'admin (ndaw22@gmail.com) peut lire, lister et modifier (status) tous les produits."
     }
   }
 }
