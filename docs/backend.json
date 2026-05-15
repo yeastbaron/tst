@@ -19,16 +19,15 @@
       "description": "Annonce d'un produit dans la marketplace.",
       "type": "object",
       "properties": {
-        "id": { "type": "string" },
         "title": { "type": "string" },
         "description": { "type": "string" },
         "basePrice": { "type": "number" },
-        "condition": { "type": "string", "enum": ["new", "used", "refurbished"] },
+        "condition": { "type": "string" },
         "category": { "type": "string" },
         "images": { "type": "array", "items": { "type": "string" } },
         "sellerId": { "type": "string" },
-        "status": { "type": "string", "enum": ["pending", "active", "sold", "rejected"] },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "status": { "type": "string" },
+        "createdAt": { "type": "object" }
       },
       "required": ["title", "basePrice", "sellerId", "status"]
     }
@@ -39,11 +38,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": "#/backend/entities/UserProfile",
-      "description": "DROITS PROFILS : Lecture et écriture pour le propriétaire. Accès total pour l'admin (ndaw22@gmail.com)."
+      "description": "LECTURE/ÉCRITURE : Autorisé pour le propriétaire du profil (userId == auth.uid) ou l'administrateur (ndaw22@gmail.com)."
     },
     "/products/{productId}": {
       "schema": "#/backend/entities/Product",
-      "description": "DROITS PRODUITS : Lecture publique pour tous si status == 'active'. Tout utilisateur connecté peut créer. Seul le propriétaire ou l'admin peut modifier."
+      "description": "LECTURE : Publique pour tous si status == 'active'. ÉCRITURE : Création autorisée pour tout utilisateur authentifié (auth != null). Mise à jour/Suppression autorisée uniquement pour le propriétaire (sellerId == auth.uid) ou l'administrateur (ndaw22@gmail.com)."
     }
   }
 }
