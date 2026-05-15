@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useParams } from 'next/navigation';
@@ -16,7 +15,6 @@ export default function ProductDetailPage() {
   const { id } = useParams();
   const [activeImage, setActiveImage] = useState(0);
 
-  // Mock product data - in a real app, fetch by ID
   const product = {
     id: id as string,
     title: 'iPhone 13 Pro 256GB - Bleu Alpin',
@@ -42,7 +40,6 @@ export default function ProductDetailPage() {
       <main className="flex-1 py-8 md:py-12 bg-muted/10">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Gallery Column */}
             <div className="space-y-4">
               <div className="aspect-square relative rounded-[2rem] overflow-hidden bg-white border shadow-sm">
                 <Image 
@@ -65,7 +62,6 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Info Column */}
             <div className="space-y-8">
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
@@ -94,7 +90,6 @@ export default function ProductDetailPage() {
                 </Button>
               </div>
 
-              {/* Guarantees */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex gap-3 items-center bg-white p-4 rounded-2xl border">
                   <ShieldCheck className="h-8 w-8 text-primary" />
@@ -112,7 +107,6 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              {/* Privacy Notice */}
               <div className="bg-accent p-6 rounded-2xl border border-primary/10 space-y-2">
                 <div className="flex items-center gap-2 text-primary font-bold">
                   <Info className="h-5 w-5" />
@@ -123,9 +117,10 @@ export default function ProductDetailPage() {
                 </p>
               </div>
 
-              {/* Description */}
               <div className="space-y-4 pt-4">
-                <h3 className="text-xl font-black uppercase tracking-tight border-b pb-2">Description</h3>
+                <div className="bg-muted p-3 md:p-4 rounded-xl border border-border/50">
+                  <h3 className="text-base md:text-lg font-normal uppercase tracking-wide">Description</h3>
+                </div>
                 <p className="text-lg text-muted-foreground leading-relaxed font-medium">
                   {product.description}
                 </p>
@@ -139,7 +134,6 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="flex items-center justify-between pt-8 border-t">
                 <Button variant="ghost" className="font-bold gap-2">
                   <Share2 className="h-5 w-5" /> Partager

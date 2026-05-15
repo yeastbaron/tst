@@ -25,13 +25,11 @@ export default function Home() {
     { id: '8', title: 'PS5 Slim 1To', basePrice: 380000, image: PlaceHolderImages[5].imageUrl, condition: 'new' as const, category: 'Sports' },
   ];
 
-  // Mock function to get samples for a category
   const getCategorySamples = (categoryName: string) => {
     return [
       { id: `s1-${categoryName}`, title: `Article ${categoryName} 1`, basePrice: 25000, image: PlaceHolderImages[0].imageUrl, condition: 'used' as const, category: categoryName },
       { id: `s2-${categoryName}`, title: `Article ${categoryName} 2`, basePrice: 45000, image: PlaceHolderImages[1].imageUrl, condition: 'new' as const, category: categoryName },
       { id: `s3-${categoryName}`, title: `Article ${categoryName} 3`, basePrice: 15000, image: PlaceHolderImages[2].imageUrl, condition: 'used' as const, category: categoryName },
-      { id: `s4-${categoryName}`, title: `Article ${categoryName} 4`, basePrice: 85000, image: PlaceHolderImages[3].imageUrl, condition: 'new' as const, category: categoryName },
     ];
   };
 
@@ -40,18 +38,16 @@ export default function Home() {
       <Header />
       
       <main className="flex-1">
-        {/* Ad Banner 1: Top of Page */}
         <div className="container mx-auto px-4 pt-6">
           <AdBanner />
         </div>
 
-        {/* Featured Products Section */}
         <section className="py-8 md:py-10">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6 bg-muted/60 p-3 md:p-4 rounded-xl border border-border/50">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-secondary fill-secondary" />
-                <h2 className="text-xl md:text-2xl font-black tracking-tight uppercase">Articles à la Une</h2>
+                <Sparkles className="h-4 w-4 text-secondary fill-secondary" />
+                <h2 className="text-lg md:text-xl font-normal tracking-wide uppercase">Articles à la Une</h2>
               </div>
             </div>
 
@@ -63,14 +59,12 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Categories Section - Carousel on Mobile/Tablet, Grid on Desktop */}
         <section className="py-8 border-t bg-muted/5">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl md:text-2xl font-black tracking-tight uppercase">Catégories</h2>
+            <div className="flex items-center justify-between mb-6 bg-muted p-3 md:p-4 rounded-xl border border-border/50">
+              <h2 className="text-lg md:text-xl font-normal tracking-wide uppercase">Catégories</h2>
             </div>
             
-            {/* Mobile/Tablet Carousel */}
             <div className="block lg:hidden">
               <Carousel className="w-full">
                 <CarouselContent className="-ml-2">
@@ -84,7 +78,6 @@ export default function Home() {
                             fill
                             className="object-cover group-hover:scale-105 transition-transform duration-500"
                             sizes="33vw"
-                            data-ai-hint="product category"
                           />
                           <div className="absolute inset-0 bg-black/20" />
                           <div className="absolute inset-0 flex items-center justify-center p-1">
@@ -100,14 +93,9 @@ export default function Home() {
               </Carousel>
             </div>
 
-            {/* Desktop Grid */}
             <div className="hidden lg:grid grid-cols-3 gap-8">
               {CATEGORIES.map((cat) => (
-                <Link 
-                  key={cat.id} 
-                  href={`/products?category=${cat.id}`}
-                  className="group flex flex-col"
-                >
+                <Link key={cat.id} href={`/products?category=${cat.id}`} className="group flex flex-col">
                   <div className="relative w-full aspect-[16/9] rounded-[2.5rem] overflow-hidden bg-white border border-border/50 hover:border-primary/30 hover:shadow-xl transition-all mb-4">
                     <Image 
                       src={cat.image || 'https://picsum.photos/seed/placeholder/800/450'} 
@@ -115,7 +103,6 @@ export default function Home() {
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                       sizes="33vw"
-                      data-ai-hint="product category"
                     />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
                     <div className="absolute inset-0 flex items-center justify-center p-4">
@@ -130,16 +117,14 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Ad Banner 2: Middle */}
         <div className="container mx-auto px-4 py-4">
           <AdBanner id="ad-banner" />
         </div>
 
-        {/* Recent Products Section */}
         <section className="py-8 md:py-12 bg-accent/30">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl md:text-2xl font-black tracking-tight uppercase">Articles Récents</h2>
+            <div className="flex items-center justify-between mb-6 bg-muted p-3 md:p-4 rounded-xl border border-border/50">
+              <h2 className="text-lg md:text-xl font-normal tracking-wide uppercase">Articles Récents</h2>
               <Link href="/products" className="text-primary font-bold flex items-center gap-1 hover:underline text-xs md:text-sm">
                 Voir tout <ArrowRight className="h-3 w-3 md:h-4 md:w-4" />
               </Link>
@@ -153,7 +138,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* CTA Section */}
         <section className="py-12 md:py-20 border-t">
           <div className="container mx-auto px-4">
             <div className="bg-secondary p-8 md:p-16 rounded-[2rem] md:rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-8 text-secondary-foreground overflow-hidden relative">
@@ -175,26 +159,24 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Category Samples Sections - Full page content */}
         {CATEGORIES.map((cat) => (
           <section key={cat.id} className="py-10 border-t last:mb-10">
             <div className="container mx-auto px-4">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl md:text-2xl font-black tracking-tight uppercase">{cat.name}</h2>
+              <div className="flex items-center justify-between mb-6 bg-muted/40 p-3 md:p-4 rounded-xl border border-border/50">
+                <h2 className="text-lg md:text-xl font-normal tracking-wide uppercase">{cat.name}</h2>
                 <Link href={`/products?category=${cat.id}`} className="text-primary font-bold flex items-center gap-1 hover:underline text-xs md:text-sm">
                   Voir plus <ArrowRight className="h-3 w-3 md:h-4 md:w-4" />
                 </Link>
               </div>
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 md:gap-4">
                 {getCategorySamples(cat.name).map((p) => (
-                  <ProductCard key={p.id} product={p} />
+                  <ProductCard key={p.id} product={{...p, category: cat.name}} />
                 ))}
               </div>
             </div>
           </section>
         ))}
 
-        {/* Ad Banner 3: Bottom */}
         <div className="container mx-auto px-4 py-8">
           <AdBanner id="ad-banner" />
         </div>

@@ -52,11 +52,9 @@ export default function ProductsPage() {
       <Header />
       
       <main className="flex-1 bg-muted/10 pb-20">
-        {/* Search Header */}
         <section className="bg-white border-b py-4 md:py-8 sticky top-16 z-40">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
-              {/* Hidden on mobile, visible on desktop */}
               <div className="relative group hidden md:block">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input 
@@ -100,18 +98,16 @@ export default function ProductsPage() {
           </div>
         </section>
 
-        {/* Ad Banner on Shop Page */}
         <div className="container mx-auto px-4 mt-8">
           <AdBanner className="mb-8" />
         </div>
 
-        {/* Product Grid */}
         <section className="py-4">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-8">
-              <h1 className="text-2xl font-black uppercase tracking-tight">
+            <div className="flex items-center justify-between mb-8 bg-muted p-3 md:p-4 rounded-xl border border-border/50">
+              <h1 className="text-lg md:text-xl font-normal tracking-wide uppercase">
                 {selectedCategory ? CATEGORIES.find(c => c.id === selectedCategory)?.name : 'Tous les articles'}
-                <span className="ml-2 text-muted-foreground font-medium normal-case text-lg">({filteredProducts.length})</span>
+                <span className="ml-2 text-muted-foreground font-medium normal-case text-base">({filteredProducts.length})</span>
               </h1>
               
               <div className="flex items-center gap-4">
