@@ -35,7 +35,7 @@ export function Header() {
     setMounted(true);
   }, []);
 
-  const logoUrl = PlaceHolderImages.find(img => img.id === 'logo')?.imageUrl || '';
+  const logoUrl = PlaceHolderImages.find(img => img.id === 'logo')?.imageUrl;
 
   const handleLogin = async () => {
     if (!auth) return;
@@ -86,8 +86,10 @@ export function Header() {
               <SheetTitle className="sr-only">Menu</SheetTitle>
               <SheetDescription className="sr-only">Catégories et services</SheetDescription>
               <ScrollArea className="h-full px-6 py-8">
-                <div className="mb-8">
-                  <Image src={logoUrl} alt="Logo" width={140} height={50} className="object-contain" />
+                <div className="mb-8 h-12 relative">
+                  {logoUrl && (
+                    <Image src={logoUrl} alt="Logo" fill className="object-contain" priority />
+                  )}
                 </div>
                 <nav className="flex flex-col gap-4">
                   <Link href="/" className="text-lg font-bold hover:text-primary transition-colors">Accueil</Link>
@@ -111,7 +113,9 @@ export function Header() {
 
         <Link href="/" className="flex items-center">
           <div className="relative w-40 h-12 md:w-56 md:h-16">
-            <Image src={logoUrl} alt="SalleDeVente.sn" fill className="object-contain" priority />
+            {logoUrl && (
+              <Image src={logoUrl} alt="SalleDeVente.sn" fill className="object-contain" priority />
+            )}
           </div>
         </Link>
 
