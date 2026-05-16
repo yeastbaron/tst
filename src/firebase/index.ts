@@ -9,7 +9,8 @@ export function initializeFirebase() {
     const existingApp = getApps().length > 0 ? getApp() : null;
     const app = existingApp || initializeApp(firebaseConfig);
     
-    // Utilisation de la base de données (default) pour assurer le déploiement des règles de sécurité
+    // IMPORTANT : On utilise l'instance (default) pour garantir que les règles 
+    // de sécurité définies dans backend.json sont bien appliquées.
     const db = getFirestore(app);
     const auth = getAuth(app);
     

@@ -49,61 +49,60 @@ export function Header() {
       const loggedUser = result.user;
       const userRef = doc(db, 'users', loggedUser.uid);
       
-      try {
-        const userSnap = await getDoc(userRef);
-
-        if (!userSnap.exists()) {
-          const userData = {
-            uid: loggedUser.uid,
-            email: loggedUser.email,
-            CompleteName: loggedUser.displayName || '',
-            photoURL: loggedUser.photoURL || '',
-            role: loggedUser.email === 'ndaw22@gmail.com' ? 'admin' : 'user',
-            lastLogin: new Date().toISOString()
-          };
-          setDoc(userRef, userData).catch(async (e) => {
-             const permErr = new FirestorePermissionError({
-               path: userRef.path,
-               operation: 'create',
-               requestResourceData: userData
-             });
-             errorEmitter.emit('permission-error', permErr);
-          });
-        } else {
-          setDoc(userRef, {
-            lastLogin: new Date().toISOString()
-          }, { merge: true }).catch(async (e) => {
-             const permErr = new FirestorePermissionError({
-               path: userRef.path,
-               operation: 'update',
-               requestResourceData: { lastLogin: new Date().toISOString() }
-             });
-             errorEmitter.emit('permission-error', permErr);
-          });
-        }
-
-        toast({
-          title: "Connexion réussie",
-          description: `Bienvenue, ${loggedUser.displayName} !`,
-        });
-
-        if (loggedUser.email === 'ndaw22@gmail.com') {
-          router.push('/admin');
-        }
-      } catch (firestoreError: any) {
+      const userSnap = await getDoc(userRef).catch(async (e) => {
         const permissionError = new FirestorePermissionError({
           path: userRef.path,
           operation: 'get',
         });
         errorEmitter.emit('permission-error', permissionError);
+        throw e;
+      });
+
+      const now = new Date().toISOString();
+
+      if (!userSnap.exists()) {
+        const userData = {
+          uid: loggedUser.uid,
+          email: loggedUser.email,
+          CompleteName: loggedUser.displayName || '',
+          photoURL: loggedUser.photoURL || '',
+          role: loggedUser.email === 'ndaw22@gmail.com' ? 'admin' : 'user',
+          lastLogin: now
+        };
+        setDoc(userRef, userData).catch(async (e) => {
+           const permErr = new FirestorePermissionError({
+             path: userRef.path,
+             operation: 'create',
+             requestResourceData: userData
+           });
+           errorEmitter.emit('permission-error', permErr);
+        });
+      } else {
+        setDoc(userRef, {
+          lastLogin: now,
+          photoURL: loggedUser.photoURL || '',
+          CompleteName: loggedUser.displayName || userSnap.data().CompleteName
+        }, { merge: true }).catch(async (e) => {
+           const permErr = new FirestorePermissionError({
+             path: userRef.path,
+             operation: 'update',
+             requestResourceData: { lastLogin: now }
+           });
+           errorEmitter.emit('permission-error', permErr);
+        });
+      }
+
+      toast({
+        title: "Connexion réussie",
+        description: `Bienvenue, ${loggedUser.displayName} !`,
+      });
+
+      if (loggedUser.email === 'ndaw22@gmail.com') {
+        router.push('/admin');
       }
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') return;
-      toast({
-        variant: "destructive",
-        title: "Erreur de connexion",
-        description: error.message || "Impossible de se connecter avec Google.",
-      });
+      console.error("Login Error:", error);
     }
   };
 
