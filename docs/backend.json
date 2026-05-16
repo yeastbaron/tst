@@ -25,7 +25,7 @@
   "firestore": {
     "/products/{productId}": {
       "schema": "Product",
-      "description": "Public access: Anyone can read and create products to facilitate step-by-step testing."
+      "description": "PUBLIC ACCESS: Anyone can read, list, and create documents in this collection. allow read: if true; allow create: if true;"
     }
   }
 }

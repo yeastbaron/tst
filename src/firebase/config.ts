@@ -1,7 +1,7 @@
 
 /**
  * Firebase configuration for SalleDeVente.sn
- * SYNC_VERSION: 2024-05-16-v3-New-Database-Reset
+ * SYNC_VERSION: 2024-05-16-v5-Public-Access-Fix
  */
 export const firebaseConfig = {
   apiKey: "AIzaSyBqF9OUEd6-ldEa8oNUKAYev1CWelI-flU",
