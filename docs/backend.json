@@ -3,7 +3,7 @@
   "entities": {
     "UserProfile": {
       "title": "Profil Utilisateur",
-      "description": "Données utilisateur.",
+      "description": "Données de compte des utilisateurs de la plateforme.",
       "type": "object",
       "properties": {
         "uid": { "type": "string" },
@@ -11,23 +11,23 @@
         "displayName": { "type": "string" },
         "photoURL": { "type": "string" },
         "role": { "type": "string", "enum": ["user", "admin"] },
-        "lastLogin": { "type": "string" }
+        "lastLogin": { "type": "string", "format": "date-time" }
       },
       "required": ["uid", "email"]
     },
     "Product": {
       "title": "Produit",
-      "description": "Annonce produit.",
+      "description": "Annonce de produit déposée par un vendeur.",
       "type": "object",
       "properties": {
         "title": { "type": "string" },
         "description": { "type": "string" },
         "basePrice": { "type": "number" },
-        "condition": { "type": "string" },
+        "condition": { "type": "string", "enum": ["new", "used", "refurbished"] },
         "category": { "type": "string" },
         "images": { "type": "array", "items": { "type": "string" } },
         "sellerId": { "type": "string" },
-        "status": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "active", "rejected", "sold"] },
         "createdAt": { "type": "object" }
       },
       "required": ["title", "basePrice", "sellerId", "status"]
@@ -39,11 +39,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": "#/backend/entities/UserProfile",
-      "description": "Anyone can read user profiles. Only the owner (userId matches auth.uid) or the admin ndaw22@gmail.com can write. ALLOW READ: if true; ALLOW WRITE: if request.auth != null && (request.auth.uid == userId || request.auth.token.email == 'ndaw22@gmail.com')"
+      "description": "Lecture par tout utilisateur connecté. Écriture par le propriétaire ou l'admin. ALLOW READ: if request.auth != null; ALLOW WRITE: if request.auth != null && (request.auth.uid == userId || request.auth.token.email == 'ndaw22@gmail.com')"
     },
     "/products/{productId}": {
       "schema": "#/backend/entities/Product",
-      "description": "Public read for active products. Authenticated users can create. Owners or admin ndaw22@gmail.com can update/delete. ALLOW READ: if resource.data.status == 'active' || (request.auth != null && (request.auth.uid == resource.data.sellerId || request.auth.token.email == 'ndaw22@gmail.com')); ALLOW CREATE: if request.auth != null; ALLOW UPDATE, DELETE: if request.auth != null && (request.auth.uid == resource.data.sellerId || request.auth.token.email == 'ndaw22@gmail.com')"
+      "description": "Lecture publique pour les produits actifs. Création par tout utilisateur connecté. Modification par le propriétaire ou l'admin. ALLOW READ: if resource.data.status == 'active' || (request.auth != null && (request.auth.uid == resource.data.sellerId || request.auth.token.email == 'ndaw22@gmail.com')); ALLOW CREATE: if request.auth != null; ALLOW UPDATE, DELETE: if request.auth != null && (request.auth.uid == resource.data.sellerId || request.auth.token.email == 'ndaw22@gmail.com')"
     }
   }
 }

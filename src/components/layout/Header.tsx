@@ -11,7 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { CATEGORIES } from '@/lib/constants';
 import { useUser, useAuth, useFirestore } from '@/firebase';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
@@ -52,7 +52,6 @@ export function Header() {
       
       setDoc(userRef, userData, { merge: true })
         .catch(async () => {
-          // On n'émet l'erreur que si ce n'est pas un problème de propagation initiale
           const permissionError = new FirestorePermissionError({
             path: userRef.path,
             operation: 'write',

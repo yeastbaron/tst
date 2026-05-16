@@ -8,7 +8,9 @@ export function initializeFirebase() {
   try {
     const existingApp = getApps().length > 0 ? getApp() : null;
     const app = existingApp || initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    
+    // Connexion à la base de données nommée 'salledevente00' comme demandé
+    const db = getFirestore(app, 'salledevente00');
     const auth = getAuth(app);
     
     return { app, db, auth };
