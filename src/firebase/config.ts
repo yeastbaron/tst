@@ -1,6 +1,9 @@
 
-// Firebase configuration for SalleDeVente.sn
-// Security Rules Refresh: v9 (Explicitly allowing authenticated creates for products and public reads)
+/**
+ * Firebase configuration for SalleDeVente.sn
+ * FORCE_REDEPLOY_ID: v10-Marketplace-Sync
+ * Note: Redirecting all traffic to (default) database to ensure security rules are applied.
+ */
 export const firebaseConfig = {
   apiKey: "AIzaSyBqF9OUEd6-ldEa8oNUKAYev1CWelI-flU",
   authDomain: "studio-1995117372-94954.firebaseapp.com",
