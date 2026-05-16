@@ -39,11 +39,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": "#/backend/entities/UserProfile",
-      "description": "User profiles. Read: any authenticated user. Write: only the owner of the profile or the admin ndaw22@gmail.com."
+      "description": "User profile access. Read: any authenticated user. Write: owner (request.auth.uid == userId) or admin (ndaw22@gmail.com)."
     },
     "/products/{productId}": {
       "schema": "#/backend/entities/Product",
-      "description": "Product listings. Read: everyone (public). Write: any authenticated user."
+      "description": "Product listings. Read: anyone. Write: any authenticated user."
     }
   }
 }

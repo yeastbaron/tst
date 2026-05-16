@@ -41,7 +41,6 @@ function LoginContent() {
     try {
       const result = await signInWithPopup(auth, provider);
       const loggedUser = result.user;
-
       const userRef = doc(db, 'users', loggedUser.uid);
       
       try {
