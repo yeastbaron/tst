@@ -1,4 +1,5 @@
 
+// Firebase configuration for SalleDeVente.sn
 export const firebaseConfig = {
   apiKey: "AIzaSyBqF9OUEd6-ldEa8oNUKAYev1CWelI-flU",
   authDomain: "studio-1995117372-94954.firebaseapp.com",
