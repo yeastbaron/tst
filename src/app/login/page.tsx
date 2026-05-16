@@ -1,24 +1,20 @@
 
 "use client";
 
-import { useAuth, useUser, useFirestore } from '@/firebase';
+import { useAuth, useUser } from '@/firebase';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { LogIn, Loader2, ShieldCheck } from 'lucide-react';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, Suspense } from 'react';
-import { doc, setDoc } from 'firebase/firestore';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
 
 function LoginContent() {
   const { user, loading } = useUser();
   const auth = useAuth();
-  const db = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
   const searchParams = useSearchParams();
@@ -31,33 +27,10 @@ function LoginContent() {
   }, [user, loading, router, redirectTo]);
 
   const handleLogin = async () => {
-    if (!auth || !db) return;
+    if (!auth) return;
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      
-      const userData = {
-        uid: result.user.uid,
-        email: result.user.email,
-        displayName: result.user.displayName,
-        photoURL: result.user.photoURL,
-        role: result.user.email === 'ndaw22@gmail.com' ? 'admin' : 'user',
-        lastLogin: new Date().toISOString()
-      };
-
-      // TRÈS IMPORTANT : L'ID du document doit être le UID de l'utilisateur
-      const userRef = doc(db, 'users', result.user.uid);
-      
-      setDoc(userRef, userData, { merge: true })
-        .catch(async () => {
-          const permissionError = new FirestorePermissionError({
-            path: userRef.path,
-            operation: 'write',
-            requestResourceData: userData,
-          });
-          errorEmitter.emit('permission-error', permissionError);
-        });
-
       toast({
         title: "Connexion réussie",
         description: `Bienvenue sur SalleDeVente.sn, ${result.user.displayName} !`,

@@ -5,22 +5,13 @@ import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { CATEGORIES } from '@/lib/constants';
+import { CATEGORIES, MOCK_PRODUCTS } from '@/lib/constants';
 import { ProductCard } from '@/components/products/ProductCard';
 import { AdBanner } from '@/components/ads/AdBanner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, SlidersHorizontal, Loader2, Sparkles, X } from 'lucide-react';
 import { smartProductSearch } from '@/ai/flows/smart-product-search-flow';
-
-// Données statiques
-const MOCK_PRODUCTS = [
-  { id: '1', title: 'iPhone 13 Pro Max - 256Go', basePrice: 450000, condition: 'used', category: 'electronics', images: ['https://picsum.photos/seed/iphone/800/800'] },
-  { id: '2', title: 'MacBook Air M2 2023', basePrice: 750000, condition: 'new', category: 'electronics', images: ['https://picsum.photos/seed/macbook/800/800'] },
-  { id: '3', title: 'Chaussures Jordan Retro 4', basePrice: 85000, condition: 'new', category: 'fashion', images: ['https://picsum.photos/seed/jordan/800/800'] },
-  { id: '4', title: 'Canapé Scandinave 3 Places', basePrice: 150000, condition: 'new', category: 'home', images: ['https://picsum.photos/seed/sofa/800/800'] },
-  { id: '5', title: 'PlayStation 5 + 2 Manettes', basePrice: 380000, condition: 'used', category: 'sports', images: ['https://picsum.photos/seed/ps5/800/800'] },
-];
 
 function ProductsContent() {
   const searchParams = useSearchParams();
@@ -50,6 +41,7 @@ function ProductsContent() {
   };
 
   const filteredProducts = MOCK_PRODUCTS.filter((p: any) => {
+    if (p.status !== 'active') return false;
     if (selectedCategory && p.category !== selectedCategory) return false;
     if (searchQuery && !p.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;

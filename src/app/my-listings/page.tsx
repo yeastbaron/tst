@@ -1,31 +1,22 @@
 
 "use client";
 
-import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { useUser } from '@/firebase';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { collection, query, where, orderBy } from 'firebase/firestore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Loader2, Package, PlusCircle, ExternalLink, Clock, CheckCircle2, XCircle, Tag } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { MOCK_PRODUCTS } from '@/lib/constants';
 
 export default function MyListingsPage() {
   const { user, loading: authLoading } = useUser();
-  const db = useFirestore();
 
-  const myProductsQuery = useMemoFirebase(() => {
-    if (!db || !user) return null;
-    return query(
-      collection(db, 'products'),
-      where('sellerId', '==', user.uid),
-      orderBy('createdAt', 'desc')
-    );
-  }, [db, user]);
-
-  const { data: listings, loading: productsLoading } = useCollection(myProductsQuery);
+  // En mode prototype, on affiche les produits liés à l'utilisateur de démo
+  const listings = MOCK_PRODUCTS.filter(p => p.sellerId === 'demo-user');
 
   if (authLoading) {
     return (
@@ -82,9 +73,7 @@ export default function MyListingsPage() {
             </Button>
           </div>
 
-          {productsLoading ? (
-            <div className="flex justify-center py-24"><Loader2 className="animate-spin h-12 w-12 text-primary" /></div>
-          ) : listings && listings.length > 0 ? (
+          {listings && listings.length > 0 ? (
             <div className="grid grid-cols-1 gap-6">
               {listings.map((item: any) => (
                 <Card key={item.id} className="overflow-hidden border-border/50 hover:border-primary/20 transition-all rounded-2xl shadow-sm bg-white">
@@ -115,7 +104,7 @@ export default function MyListingsPage() {
                       </div>
                       
                       <div className="pt-4 border-t flex items-center justify-between text-xs text-muted-foreground font-medium">
-                        <p>Publié le {item.createdAt?.toDate ? new Date(item.createdAt.toDate()).toLocaleDateString('fr-FR') : 'Date inconnue'}</p>
+                        <p>Publié le {new Date(item.createdAt).toLocaleDateString('fr-FR')}</p>
                         {item.status === 'pending' && (
                           <p className="text-secondary italic">Validation en cours (moins de 24h)</p>
                         )}

@@ -1,10 +1,9 @@
 
 "use client";
 
-import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { useUser } from '@/firebase';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { collection, query, where, doc, updateDoc, orderBy } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,51 +11,23 @@ import { Check, X, Eye, Loader2, ShieldAlert } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
+import { MOCK_PRODUCTS } from '@/lib/constants';
 
 export default function AdminPage() {
   const { user, loading: authLoading } = useUser();
-  const db = useFirestore();
   const { toast } = useToast();
 
   const isAdmin = user?.email === 'ndaw22@gmail.com';
 
-  const pendingQuery = useMemoFirebase(() => {
-    if (!db || !isAdmin) return null;
-    return query(
-      collection(db, 'products'),
-      where('status', '==', 'pending'),
-      orderBy('createdAt', 'desc')
-    );
-  }, [db, isAdmin]);
-
-  const { data: pendingProducts, loading: productsLoading } = useCollection(pendingQuery);
+  // Mode prototype : on filtre les produits en attente du mock
+  const pendingProducts = MOCK_PRODUCTS.filter(p => p.status === 'pending');
 
   const handleApprove = (productId: string) => {
-    if (!db) return;
-    const docRef = doc(db, 'products', productId);
-    updateDoc(docRef, { status: 'active' })
-      .then(() => {
-        toast({ title: "Produit approuvé !", description: "L'annonce est maintenant visible par tous." });
-      })
-      .catch(async () => {
-        const error = new FirestorePermissionError({ path: docRef.path, operation: 'update' });
-        errorEmitter.emit('permission-error', error);
-      });
+    toast({ title: "Produit approuvé (Démo)!", description: "L'annonce serait maintenant visible." });
   };
 
   const handleReject = (productId: string) => {
-    if (!db) return;
-    const docRef = doc(db, 'products', productId);
-    updateDoc(docRef, { status: 'rejected' })
-      .then(() => {
-        toast({ variant: "destructive", title: "Annonce rejetée", description: "L'annonce ne sera pas publiée." });
-      })
-      .catch(async () => {
-        const error = new FirestorePermissionError({ path: docRef.path, operation: 'update' });
-        errorEmitter.emit('permission-error', error);
-      });
+    toast({ variant: "destructive", title: "Annonce rejetée (Démo)", description: "L'annonce ne serait pas publiée." });
   };
 
   if (authLoading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin h-8 w-8 text-primary" /></div>;
@@ -89,13 +60,11 @@ export default function AdminPage() {
               <p className="text-muted-foreground text-sm font-medium">Gestion des annonces en attente de validation.</p>
             </div>
             <Badge variant="outline" className="text-primary font-bold border-primary/20 px-4 py-1 rounded-full">
-              {pendingProducts?.length || 0} en attente
+              {pendingProducts.length} en attente
             </Badge>
           </div>
 
-          {productsLoading ? (
-            <div className="flex justify-center py-24"><Loader2 className="animate-spin h-12 w-12 text-primary" /></div>
-          ) : pendingProducts && pendingProducts.length > 0 ? (
+          {pendingProducts.length > 0 ? (
             <div className="grid grid-cols-1 gap-4">
               {pendingProducts.map((p: any) => (
                 <Card key={p.id} className="overflow-hidden border-border/50 hover:border-primary/30 transition-all rounded-2xl bg-white shadow-sm">

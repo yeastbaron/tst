@@ -4,35 +4,21 @@
 import { useParams } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { calculatePriceWithCommission, CATEGORIES } from '@/lib/constants';
+import { calculatePriceWithCommission, CATEGORIES, MOCK_PRODUCTS } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ShieldCheck, Truck, Heart, Share2, Info, Loader2, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, Truck, Heart, Share2, Info, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
-import { useState } from 'react';
-import { useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const [activeImage, setActiveImage] = useState(0);
-  const db = useFirestore();
 
-  const productRef = useMemoFirebase(() => {
-    if (!db || !id) return null;
-    return doc(db, 'products', id as string);
-  }, [db, id]);
-
-  const { data: product, loading } = useDoc(productRef);
-
-  if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <Loader2 className="animate-spin h-8 w-8 text-primary" />
-      </div>
-    );
-  }
+  const product = useMemo(() => {
+    return MOCK_PRODUCTS.find(p => p.id === id);
+  }, [id]);
 
   if (!product) {
     return (
