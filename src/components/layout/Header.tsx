@@ -17,6 +17,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,39 +48,62 @@ export function Header() {
       const result = await signInWithPopup(auth, provider);
       const loggedUser = result.user;
 
-      // Enregistrement/Vérification dans la collection users de salledevente00
       const userRef = doc(db, 'users', loggedUser.uid);
-      const userSnap = await getDoc(userRef);
+      
+      try {
+        const userSnap = await getDoc(userRef);
 
-      if (!userSnap.exists()) {
-        await setDoc(userRef, {
-          uid: loggedUser.uid,
-          email: loggedUser.email,
-          CompleteName: loggedUser.displayName || '',
-          photoURL: loggedUser.photoURL || '',
-          role: loggedUser.email === 'ndaw22@gmail.com' ? 'admin' : 'user',
-          lastLogin: new Date().toISOString()
+        if (!userSnap.exists()) {
+          const userData = {
+            uid: loggedUser.uid,
+            email: loggedUser.email,
+            CompleteName: loggedUser.displayName || '',
+            photoURL: loggedUser.photoURL || '',
+            role: loggedUser.email === 'ndaw22@gmail.com' ? 'admin' : 'user',
+            lastLogin: new Date().toISOString()
+          };
+          setDoc(userRef, userData).catch(async (e) => {
+             const permErr = new FirestorePermissionError({
+               path: userRef.path,
+               operation: 'create',
+               requestResourceData: userData
+             });
+             errorEmitter.emit('permission-error', permErr);
+          });
+        } else {
+          setDoc(userRef, {
+            lastLogin: new Date().toISOString()
+          }, { merge: true }).catch(async (e) => {
+             const permErr = new FirestorePermissionError({
+               path: userRef.path,
+               operation: 'update',
+               requestResourceData: { lastLogin: new Date().toISOString() }
+             });
+             errorEmitter.emit('permission-error', permErr);
+          });
+        }
+
+        toast({
+          title: "Connexion réussie",
+          description: `Bienvenue, ${loggedUser.displayName} !`,
         });
-      } else {
-        await setDoc(userRef, {
-          lastLogin: new Date().toISOString()
-        }, { merge: true });
-      }
 
-      toast({
-        title: "Connexion réussie",
-        description: `Bienvenue, ${loggedUser.displayName} !`,
-      });
-
-      if (loggedUser.email === 'ndaw22@gmail.com') {
-        router.push('/admin');
+        if (loggedUser.email === 'ndaw22@gmail.com') {
+          router.push('/admin');
+        }
+      } catch (firestoreError: any) {
+        const permissionError = new FirestorePermissionError({
+          path: userRef.path,
+          operation: 'get',
+        });
+        errorEmitter.emit('permission-error', permissionError);
       }
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') return;
       toast({
         variant: "destructive",
         title: "Erreur de connexion",
-        description: "Impossible de se connecter avec Google.",
+        description: error.message || "Impossible de se connecter avec Google.",
       });
     }
   };
