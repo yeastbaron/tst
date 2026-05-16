@@ -1,34 +1,19 @@
+
 "use client";
 
 import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
-import { CATEGORIES } from '@/lib/constants';
+import { CATEGORIES, MOCK_PRODUCTS } from '@/lib/constants';
 import { ProductCard } from '@/components/products/ProductCard';
 import { AdBanner } from '@/components/ads/AdBanner';
 import Link from 'next/link';
-import { Sparkles, Grid2X2, Grid3X3, LayoutGrid, Loader2 } from 'lucide-react';
+import { Sparkles, Grid2X2, Grid3X3, LayoutGrid } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, where, orderBy, limit } from 'firebase/firestore';
 
 export default function Home() {
-  const db = useFirestore();
-  
-  const productsQuery = useMemoFirebase(() => {
-    if (!db) return null;
-    return query(
-      collection(db, 'products'),
-      where('status', '==', 'active'),
-      orderBy('createdAt', 'desc'),
-      limit(12)
-    );
-  }, [db]);
-
-  const { data: activeProducts, loading } = useCollection(productsQuery);
-  
   const [productCols, setProductCols] = useState(2);
   const [categoryCols, setCategoryCols] = useState(3);
 
@@ -57,7 +42,6 @@ export default function Home() {
                     "w-8 h-8 flex items-center justify-center rounded-md transition-all",
                     productCols === 2 ? "bg-primary text-white" : "bg-white/50 text-muted-foreground hover:bg-white"
                   )}
-                  title="Grille 2 colonnes"
                 >
                   <Grid2X2 className="h-4 w-4" />
                 </button>
@@ -67,7 +51,6 @@ export default function Home() {
                     "w-8 h-8 flex items-center justify-center rounded-md transition-all",
                     productCols === 3 ? "bg-primary text-white" : "bg-white/50 text-muted-foreground hover:bg-white"
                   )}
-                  title="Grille 3 colonnes"
                 >
                   <Grid3X3 className="h-4 w-4" />
                 </button>
@@ -76,32 +59,22 @@ export default function Home() {
           </div>
 
           <div className="container mx-auto px-4 py-8">
-            {loading ? (
-              <div className="flex justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : activeProducts && activeProducts.length > 0 ? (
-              <div className={cn(
-                "grid gap-3 md:gap-4",
-                productCols === 2 ? "grid-cols-2" : "grid-cols-3",
-                "md:grid-cols-4 lg:grid-cols-6"
-              )}>
-                {activeProducts.map((p: any) => (
-                  <ProductCard key={p.id} product={{
-                    id: p.id,
-                    title: p.title,
-                    basePrice: p.basePrice,
-                    image: p.images?.[0] || 'https://picsum.photos/seed/placeholder/400/400',
-                    condition: p.condition as any,
-                    category: CATEGORIES.find(c => c.id === p.category)?.name || p.category
-                  }} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <p>Aucun article disponible pour le moment.</p>
-              </div>
-            )}
+            <div className={cn(
+              "grid gap-3 md:gap-4",
+              productCols === 2 ? "grid-cols-2" : "grid-cols-3",
+              "md:grid-cols-4 lg:grid-cols-6"
+            )}>
+              {MOCK_PRODUCTS.map((p) => (
+                <ProductCard key={p.id} product={{
+                  id: p.id,
+                  title: p.title,
+                  basePrice: p.basePrice,
+                  image: p.images[0],
+                  condition: p.condition as any,
+                  category: CATEGORIES.find(c => c.id === p.category)?.name || p.category
+                }} />
+              ))}
+            </div>
           </div>
         </section>
 
@@ -118,7 +91,6 @@ export default function Home() {
                     "w-8 h-8 flex items-center justify-center rounded-md transition-all",
                     categoryCols === 3 ? "bg-primary text-white" : "bg-white/50 text-muted-foreground hover:bg-white"
                   )}
-                  title="Grille 3 colonnes"
                 >
                   <Grid3X3 className="h-4 w-4" />
                 </button>
@@ -128,7 +100,6 @@ export default function Home() {
                     "w-8 h-8 flex items-center justify-center rounded-md transition-all",
                     categoryCols === 4 ? "bg-primary text-white" : "bg-white/50 text-muted-foreground hover:bg-white"
                   )}
-                  title="Grille 4 colonnes"
                 >
                   <LayoutGrid className="h-4 w-4" />
                 </button>

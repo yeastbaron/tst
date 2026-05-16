@@ -1,3 +1,4 @@
+
 import { PlaceHolderImages } from './placeholder-images';
 
 export const COMMISSION_RATE = 0.10;
@@ -51,6 +52,49 @@ export const CATEGORIES = [
     icon: 'Briefcase',
     image: PlaceHolderImages.find(img => img.id === 'pro')?.imageUrl,
     subcategories: ['Outillage', 'Fournitures de Bureau', 'Agriculture']
+  }
+];
+
+export const MOCK_PRODUCTS = [
+  {
+    id: '1',
+    title: 'iPhone 15 Pro Max - 256GB',
+    description: 'État comme neuf, batterie 100%. Vendu avec boîte et accessoires.',
+    basePrice: 750000,
+    condition: 'used',
+    category: 'electronics',
+    images: ['https://picsum.photos/seed/phone1/800/800'],
+    status: 'active'
+  },
+  {
+    id: '2',
+    title: 'MacBook Air M2 13"',
+    description: 'Neuf scellé, 8GB RAM, 256GB SSD. Garantie 1 an.',
+    basePrice: 650000,
+    condition: 'new',
+    category: 'electronics',
+    images: ['https://picsum.photos/seed/mac1/800/800'],
+    status: 'active'
+  },
+  {
+    id: '3',
+    title: 'Nike Air Jordan 4 Retro',
+    description: 'Taille 42, jamais portées. Édition limitée.',
+    basePrice: 120000,
+    condition: 'new',
+    category: 'fashion',
+    images: ['https://picsum.photos/seed/shoes1/800/800'],
+    status: 'active'
+  },
+  {
+    id: '4',
+    title: 'Canapé Scandinave 3 Places',
+    description: 'Tissu gris anthracite, pieds en bois naturel. Très bon état.',
+    basePrice: 180000,
+    condition: 'used',
+    category: 'home',
+    images: ['https://picsum.photos/seed/sofa1/800/800'],
+    status: 'active'
   }
 ];
 
