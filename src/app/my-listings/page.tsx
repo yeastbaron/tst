@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useUser } from '@/firebase';
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,15 +9,25 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Package, PlusCircle, ExternalLink, Clock, CheckCircle2, XCircle, Tag } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MOCK_PRODUCTS } from '@/lib/constants';
+import { collection, query, where, orderBy } from 'firebase/firestore';
+import { CATEGORIES } from '@/lib/constants';
 
 export default function MyListingsPage() {
   const { user, loading: authLoading } = useUser();
+  const db = useFirestore();
 
-  // En mode prototype, on affiche les produits liés à l'utilisateur de démo
-  const listings = MOCK_PRODUCTS.filter(p => p.sellerId === 'demo-user');
+  const listingsQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(
+      collection(db, 'products'),
+      where('sellerId', '==', user.uid),
+      orderBy('createdAt', 'desc')
+    );
+  }, [db, user]);
 
-  if (authLoading) {
+  const { data: listings, loading: dataLoading } = useCollection(listingsQuery);
+
+  if (authLoading || dataLoading) {
     return (
       <div className="h-screen flex items-center justify-center">
         <Loader2 className="animate-spin h-8 w-8 text-primary" />
@@ -90,7 +99,9 @@ export default function MyListingsPage() {
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 mb-2">
                             {getStatusBadge(item.status)}
-                            <Badge variant="outline" className="text-[10px] font-bold uppercase">{item.category}</Badge>
+                            <Badge variant="outline" className="text-[10px] font-bold uppercase">
+                              {CATEGORIES.find(c => c.id === item.category)?.name || item.category}
+                            </Badge>
                           </div>
                           <h3 className="text-xl font-black uppercase leading-tight">{item.title}</h3>
                           <p className="text-2xl font-black text-primary">{item.basePrice.toLocaleString('fr-FR')} FCFA</p>
@@ -103,7 +114,7 @@ export default function MyListingsPage() {
                       </div>
                       
                       <div className="pt-4 border-t flex items-center justify-between text-xs text-muted-foreground font-medium">
-                        <p>Publié le {new Date(item.createdAt).toLocaleDateString('fr-FR')}</p>
+                        <p>Publié le {item.createdAt?.toDate ? item.createdAt.toDate().toLocaleDateString('fr-FR') : 'Date inconnue'}</p>
                         {item.status === 'pending' && (
                           <p className="text-secondary italic">Validation en cours (moins de 24h)</p>
                         )}

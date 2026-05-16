@@ -1,33 +1,66 @@
-
 "use client";
 
-import { useUser } from '@/firebase';
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Check, X, Eye, ShieldAlert } from 'lucide-react';
+import { Check, X, Eye, ShieldAlert, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
-import { MOCK_PRODUCTS } from '@/lib/constants';
 import { LoadingLogo } from '@/components/ui/loading-logo';
+import { collection, query, where, doc, updateDoc } from 'firebase/firestore';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 export default function AdminPage() {
   const { user, loading: authLoading } = useUser();
+  const db = useFirestore();
   const { toast } = useToast();
 
   const isAdmin = user?.email === 'ndaw22@gmail.com';
 
-  const pendingProducts = MOCK_PRODUCTS.filter(p => p.status === 'pending');
+  const pendingQuery = useMemoFirebase(() => {
+    if (!db || !isAdmin) return null;
+    return query(collection(db, 'products'), where('status', '==', 'pending'));
+  }, [db, isAdmin]);
+
+  const { data: pendingProducts, loading: dataLoading } = useCollection(pendingQuery);
 
   const handleApprove = (productId: string) => {
-    toast({ title: "Approbation réussie", description: "L'annonce est désormais en ligne." });
+    if (!db) return;
+    const docRef = doc(db, 'products', productId);
+    updateDoc(docRef, { status: 'active' })
+      .then(() => {
+        toast({ title: "Approbation réussie", description: "L'annonce est désormais en ligne." });
+      })
+      .catch(async (err) => {
+        const permErr = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'update',
+          requestResourceData: { status: 'active' }
+        });
+        errorEmitter.emit('permission-error', permErr);
+      });
   };
 
   const handleReject = (productId: string) => {
-    toast({ variant: "destructive", title: "Annonce rejetée", description: "Le vendeur sera notifié." });
+    if (!db) return;
+    const docRef = doc(db, 'products', productId);
+    updateDoc(docRef, { status: 'rejected' })
+      .then(() => {
+        toast({ variant: "destructive", title: "Annonce rejetée", description: "Le vendeur sera notifié." });
+      })
+      .catch(async (err) => {
+        const permErr = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'update',
+          requestResourceData: { status: 'rejected' }
+        });
+        errorEmitter.emit('permission-error', permErr);
+      });
   };
 
   if (authLoading) return <div className="h-screen flex items-center justify-center"><LoadingLogo /></div>;
@@ -62,7 +95,7 @@ export default function AdminPage() {
             <div className="flex items-center gap-4">
               <h1 className="text-[14px] font-bebas tracking-[0.1em] uppercase text-primary">Gestion des Annonces</h1>
               <Badge variant="default" className="bg-primary text-white font-bebas text-[10px] px-2 py-0 h-4 rounded-none">
-                {pendingProducts.length} EN ATTENTE
+                {pendingProducts?.length || 0} EN ATTENTE
               </Badge>
             </div>
             <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest hidden sm:block">Modération SalleDeVente.sn</p>
@@ -70,7 +103,11 @@ export default function AdminPage() {
         </div>
 
         <div className="container mx-auto px-4 py-12 max-w-5xl">
-          {pendingProducts.length > 0 ? (
+          {dataLoading ? (
+            <div className="flex justify-center py-24">
+              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            </div>
+          ) : pendingProducts && pendingProducts.length > 0 ? (
             <div className="grid grid-cols-1 gap-6">
               {pendingProducts.map((p: any) => (
                 <Card key={p.id} className="overflow-hidden border-primary/5 hover:border-primary/20 transition-all rounded-[2rem] bg-white shadow-lg group">

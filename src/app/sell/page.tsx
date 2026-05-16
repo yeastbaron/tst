@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -10,15 +9,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CATEGORIES, COMMISSION_RATE } from '@/lib/constants';
-import { Camera, X, Loader2, AlertCircle } from 'lucide-react';
+import { Camera, X, Loader2, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useUser } from '@/firebase';
+import { useUser, useFirestore } from '@/firebase';
 import { useRouter } from 'next/navigation';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { autoProductListing } from '@/ai/flows/auto-product-listing-flow';
 
 export default function SellPage() {
   const { toast } = useToast();
   const router = useRouter();
   const { user, loading } = useUser();
+  const db = useFirestore();
   
   const [images, setImages] = useState<string[]>([]);
   const [title, setTitle] = useState('');
@@ -27,6 +31,7 @@ export default function SellPage() {
   const [category, setCategory] = useState('');
   const [condition, setCondition] = useState('used');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -54,9 +59,50 @@ export default function SellPage() {
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleAutoFill = async () => {
+    if (!title || images.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Action requise",
+        description: "Veuillez saisir un titre et ajouter au moins une photo pour l'analyse IA.",
+      });
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const result = await autoProductListing({
+        title,
+        photoDataUris: images
+      });
+      
+      if (result.description) setDescription(result.description);
+      if (result.suggestedCategories?.length > 0) {
+        const found = CATEGORIES.find(c => 
+          result.suggestedCategories.some(sc => sc.toLowerCase().includes(c.name.toLowerCase()))
+        );
+        if (found) setCategory(found.id);
+      }
+
+      toast({
+        title: "Analyse terminée",
+        description: "La description et la catégorie ont été suggérées par l'IA.",
+      });
+    } catch (err) {
+      console.error(err);
+      toast({
+        variant: "destructive",
+        title: "Erreur d'analyse",
+        description: "Impossible d'analyser l'article pour le moment.",
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || !db) return;
 
     if (images.length === 0) {
       toast({
@@ -69,15 +115,35 @@ export default function SellPage() {
 
     setIsSubmitting(true);
 
-    // Simulation de succès pour le prototypage
-    setTimeout(() => {
-      toast({
-        title: "Annonce soumise (Démo) !",
-        description: "En mode démo, l'annonce n'est pas réellement enregistrée.",
+    const productData = {
+      title,
+      description,
+      basePrice: parseFloat(price),
+      condition,
+      category,
+      images,
+      sellerId: user.uid,
+      status: 'pending',
+      createdAt: serverTimestamp()
+    };
+
+    addDoc(collection(db, 'products'), productData)
+      .then(() => {
+        toast({
+          title: "Annonce publiée !",
+          description: "Votre article est en attente de modération par nos équipes.",
+        });
+        router.push('/my-listings');
+      })
+      .catch(async (err) => {
+        const permissionError = new FirestorePermissionError({
+          path: 'products',
+          operation: 'create',
+          requestResourceData: productData
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        setIsSubmitting(false);
       });
-      setIsSubmitting(false);
-      router.push('/my-listings');
-    }, 1500);
   };
 
   if (loading) {
@@ -97,9 +163,22 @@ export default function SellPage() {
       <main className="flex-1 py-12">
         <div className="container mx-auto px-4 max-w-2xl">
           <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-border/50">
-            <div className="mb-8">
-              <h1 className="text-3xl font-black uppercase tracking-tight text-primary">Vendre un article</h1>
-              <p className="text-muted-foreground font-medium">Postez votre annonce en moins de 2 minutes.</p>
+            <div className="mb-8 flex justify-between items-start">
+              <div>
+                <h1 className="text-3xl font-black uppercase tracking-tight text-primary">Vendre un article</h1>
+                <p className="text-muted-foreground font-medium">Postez votre annonce en moins de 2 minutes.</p>
+              </div>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                onClick={handleAutoFill}
+                disabled={isAnalyzing || !title || images.length === 0}
+                className="rounded-xl border-primary/20 text-primary font-bold gap-2"
+              >
+                {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                IA Assist
+              </Button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-8">

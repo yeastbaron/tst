@@ -1,24 +1,41 @@
-
 "use client";
 
 import { useParams } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { calculatePriceWithCommission, CATEGORIES, MOCK_PRODUCTS } from '@/lib/constants';
+import { calculatePriceWithCommission, CATEGORIES } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ShieldCheck, Truck, Heart, Share2, Info, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, Truck, Heart, Share2, Info, ArrowLeft, Loader2 } from 'lucide-react';
 import Image from 'next/image';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
+import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const [activeImage, setActiveImage] = useState(0);
+  const db = useFirestore();
 
-  const product = useMemo(() => {
-    return MOCK_PRODUCTS.find(p => p.id === id);
-  }, [id]);
+  const productRef = useMemoFirebase(() => {
+    if (!db || !id) return null;
+    return doc(db, 'products', id as string);
+  }, [db, id]);
+
+  const { data: product, loading } = useDoc(productRef);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!product) {
     return (

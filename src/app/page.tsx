@@ -1,22 +1,34 @@
-
 "use client";
 
 import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
-import { CATEGORIES, MOCK_PRODUCTS } from '@/lib/constants';
+import { CATEGORIES } from '@/lib/constants';
 import { ProductCard } from '@/components/products/ProductCard';
 import { AdBanner } from '@/components/ads/AdBanner';
 import Link from 'next/link';
-import { Sparkles, Grid2X2, Grid3X3, LayoutGrid } from 'lucide-react';
+import { Sparkles, Grid2X2, Grid3X3, LayoutGrid, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, where, orderBy, limit } from 'firebase/firestore';
 
 export default function Home() {
-  const activeProducts = MOCK_PRODUCTS.filter(p => p.status === 'active');
+  const db = useFirestore();
   
-  // États pour les colonnes de grille (Mobile/Tablette)
+  const productsQuery = useMemoFirebase(() => {
+    if (!db) return null;
+    return query(
+      collection(db, 'products'),
+      where('status', '==', 'active'),
+      orderBy('createdAt', 'desc'),
+      limit(12)
+    );
+  }, [db]);
+
+  const { data: activeProducts, loading } = useCollection(productsQuery);
+  
   const [productCols, setProductCols] = useState(2);
   const [categoryCols, setCategoryCols] = useState(3);
 
@@ -38,7 +50,6 @@ export default function Home() {
                 <h2 className="text-[14px] font-bebas tracking-[0.1em] uppercase">Articles à la Une</h2>
               </div>
               
-              {/* Sélecteur de grille produits - visible sur mobile/tablette (< lg) */}
               <div className="flex items-center gap-1 lg:hidden">
                 <button 
                   onClick={() => setProductCols(2)}
@@ -65,22 +76,32 @@ export default function Home() {
           </div>
 
           <div className="container mx-auto px-4 py-8">
-            <div className={cn(
-              "grid gap-3 md:gap-4",
-              productCols === 2 ? "grid-cols-2" : "grid-cols-3",
-              "md:grid-cols-4 lg:grid-cols-6" // Garder le comportement standard sur desktop
-            )}>
-              {activeProducts.map((p: any) => (
-                <ProductCard key={p.id} product={{
-                  id: p.id,
-                  title: p.title,
-                  basePrice: p.basePrice,
-                  image: p.images[0],
-                  condition: p.condition as any,
-                  category: CATEGORIES.find(c => c.id === p.category)?.name || p.category
-                }} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : activeProducts && activeProducts.length > 0 ? (
+              <div className={cn(
+                "grid gap-3 md:gap-4",
+                productCols === 2 ? "grid-cols-2" : "grid-cols-3",
+                "md:grid-cols-4 lg:grid-cols-6"
+              )}>
+                {activeProducts.map((p: any) => (
+                  <ProductCard key={p.id} product={{
+                    id: p.id,
+                    title: p.title,
+                    basePrice: p.basePrice,
+                    image: p.images?.[0] || 'https://picsum.photos/seed/placeholder/400/400',
+                    condition: p.condition as any,
+                    category: CATEGORIES.find(c => c.id === p.category)?.name || p.category
+                  }} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <p>Aucun article disponible pour le moment.</p>
+              </div>
+            )}
           </div>
         </section>
 
@@ -90,7 +111,6 @@ export default function Home() {
             <div className="container mx-auto px-4 flex items-center justify-between">
               <h2 className="text-[14px] font-bebas tracking-[0.1em] uppercase">Catégories</h2>
               
-              {/* Sélecteur de grille catégories - visible sur mobile/tablette (< lg) */}
               <div className="flex items-center gap-1 lg:hidden">
                 <button 
                   onClick={() => setCategoryCols(3)}
@@ -120,7 +140,7 @@ export default function Home() {
             <div className={cn(
               "grid gap-4",
               categoryCols === 3 ? "grid-cols-3" : "grid-cols-4",
-              "sm:grid-cols-4 lg:grid-cols-7" // Garder le comportement standard sur desktop
+              "sm:grid-cols-4 lg:grid-cols-7"
             )}>
               {CATEGORIES.map((cat) => (
                 <Link key={cat.id} href={`/products?category=${cat.id}`} className="group flex flex-col">
