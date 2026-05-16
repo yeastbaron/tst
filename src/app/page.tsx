@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
@@ -8,11 +9,16 @@ import { CATEGORIES, MOCK_PRODUCTS } from '@/lib/constants';
 import { ProductCard } from '@/components/products/ProductCard';
 import { AdBanner } from '@/components/ads/AdBanner';
 import Link from 'next/link';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Grid2X2, Grid3X3, LayoutGrid } from 'lucide-react';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 export default function Home() {
   const activeProducts = MOCK_PRODUCTS.filter(p => p.status === 'active');
+  
+  // États pour les colonnes de grille (Mobile/Tablette)
+  const [productCols, setProductCols] = useState(2);
+  const [categoryCols, setCategoryCols] = useState(3);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -23,16 +29,45 @@ export default function Home() {
           <AdBanner />
         </div>
 
+        {/* Section Produits */}
         <section className="mt-8">
           <div className="w-full bg-muted border-y border-border/50 py-3">
-            <div className="container mx-auto px-4 flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary fill-primary" />
-              <h2 className="text-[14px] font-bebas tracking-[0.1em] uppercase">Articles à la Une</h2>
+            <div className="container mx-auto px-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary fill-primary" />
+                <h2 className="text-[14px] font-bebas tracking-[0.1em] uppercase">Articles à la Une</h2>
+              </div>
+              
+              {/* Sélecteur de grille produits - visible sur mobile/tablette (< lg) */}
+              <div className="flex items-center gap-1 lg:hidden">
+                <button 
+                  onClick={() => setProductCols(2)}
+                  className={cn(
+                    "w-8 h-8 flex items-center justify-center rounded-md transition-all",
+                    productCols === 2 ? "bg-primary text-white" : "bg-white/50 text-muted-foreground hover:bg-white"
+                  )}
+                >
+                  <span className="text-[12px] font-bebas">2</span>
+                </button>
+                <button 
+                  onClick={() => setProductCols(3)}
+                  className={cn(
+                    "w-8 h-8 flex items-center justify-center rounded-md transition-all",
+                    productCols === 3 ? "bg-primary text-white" : "bg-white/50 text-muted-foreground hover:bg-white"
+                  )}
+                >
+                  <span className="text-[12px] font-bebas">3</span>
+                </button>
+              </div>
             </div>
           </div>
 
           <div className="container mx-auto px-4 py-8">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+            <div className={cn(
+              "grid gap-3 md:gap-4",
+              productCols === 2 ? "grid-cols-2" : "grid-cols-3",
+              "md:grid-cols-4 lg:grid-cols-6" // Garder le comportement standard sur desktop
+            )}>
               {activeProducts.map((p: any) => (
                 <ProductCard key={p.id} product={{
                   id: p.id,
@@ -47,15 +82,42 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Section Catégories */}
         <section>
           <div className="w-full bg-muted border-y border-border/50 py-3">
-            <div className="container mx-auto px-4">
+            <div className="container mx-auto px-4 flex items-center justify-between">
               <h2 className="text-[14px] font-bebas tracking-[0.1em] uppercase">Catégories</h2>
+              
+              {/* Sélecteur de grille catégories - visible sur mobile/tablette (< lg) */}
+              <div className="flex items-center gap-1 lg:hidden">
+                <button 
+                  onClick={() => setCategoryCols(3)}
+                  className={cn(
+                    "w-8 h-8 flex items-center justify-center rounded-md transition-all",
+                    categoryCols === 3 ? "bg-primary text-white" : "bg-white/50 text-muted-foreground hover:bg-white"
+                  )}
+                >
+                  <span className="text-[12px] font-bebas">3</span>
+                </button>
+                <button 
+                  onClick={() => setCategoryCols(4)}
+                  className={cn(
+                    "w-8 h-8 flex items-center justify-center rounded-md transition-all",
+                    categoryCols === 4 ? "bg-primary text-white" : "bg-white/50 text-muted-foreground hover:bg-white"
+                  )}
+                >
+                  <span className="text-[12px] font-bebas">4</span>
+                </button>
+              </div>
             </div>
           </div>
           
           <div className="container mx-auto px-4 py-8">
-            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-4">
+            <div className={cn(
+              "grid gap-4",
+              categoryCols === 3 ? "grid-cols-3" : "grid-cols-4",
+              "sm:grid-cols-4 lg:grid-cols-7" // Garder le comportement standard sur desktop
+            )}>
               {CATEGORIES.map((cat) => (
                 <Link key={cat.id} href={`/products?category=${cat.id}`} className="group flex flex-col">
                   <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-white border border-border/50 hover:border-primary/30 transition-all">
