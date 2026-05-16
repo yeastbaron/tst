@@ -38,12 +38,12 @@
   },
   "firestore": {
     "/users/{userId}": {
-      "schema": { "$ref": "#/entities/UserProfile" },
-      "description": "User profiles. Read: Any authenticated user. Write: Owner (auth.uid == userId) or Admin (ndaw22@gmail.com)."
+      "schema": { "$ref": "#/backend/entities/UserProfile" },
+      "description": "User profiles. Read: any authenticated user. Write: owner (auth.uid == userId) or admin (ndaw22@gmail.com)."
     },
     "/products/{productId}": {
-      "schema": { "$ref": "#/entities/Product" },
-      "description": "Product listings. Read: anyone (public). Create: authenticated users. Update/Delete: seller or admin (ndaw22@gmail.com)."
+      "schema": { "$ref": "#/backend/entities/Product" },
+      "description": "Product listings. Read: anyone (public). Create: any authenticated user. Update/Delete: owner (sellerId) or admin (ndaw22@gmail.com)."
     }
   }
 }
