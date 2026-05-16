@@ -5,21 +5,35 @@ import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { CATEGORIES, MOCK_PRODUCTS } from '@/lib/constants';
+import { CATEGORIES } from '@/lib/constants';
 import { ProductCard } from '@/components/products/ProductCard';
 import { AdBanner } from '@/components/ads/AdBanner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, SlidersHorizontal, Loader2, Sparkles, X } from 'lucide-react';
 import { smartProductSearch } from '@/ai/flows/smart-product-search-flow';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, where, orderBy } from 'firebase/firestore';
 
 function ProductsContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get('category');
+  const db = useFirestore();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(initialCategory);
+
+  const productsQuery = useMemoFirebase(() => {
+    if (!db) return null;
+    let q = query(collection(db, 'products'), where('status', '==', 'active'), orderBy('createdAt', 'desc'));
+    
+    // Note: Le filtrage par catégorie et recherche se fait ici côté client pour plus de réactivité 
+    // ou on pourrait chaîner des 'where' si les index sont créés.
+    return q;
+  }, [db]);
+
+  const { data: allProducts, loading: productsLoading } = useCollection(productsQuery);
 
   const handleSmartSearch = async () => {
     if (!searchQuery) return;
@@ -40,8 +54,7 @@ function ProductsContent() {
     }
   };
 
-  const filteredProducts = MOCK_PRODUCTS.filter((p: any) => {
-    if (p.status !== 'active') return false;
+  const filteredProducts = (allProducts || []).filter((p: any) => {
     if (selectedCategory && p.category !== selectedCategory) return false;
     if (searchQuery && !p.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
@@ -123,14 +136,18 @@ function ProductsContent() {
         </div>
 
         <div className="container mx-auto px-4 py-8">
-          {filteredProducts.length > 0 ? (
+          {productsLoading ? (
+            <div className="flex justify-center py-24">
+              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            </div>
+          ) : filteredProducts.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
               {filteredProducts.map((p: any) => (
                 <ProductCard key={p.id} product={{
                   id: p.id,
                   title: p.title,
                   basePrice: p.basePrice,
-                  image: p.images[0],
+                  image: p.images?.[0] || 'https://picsum.photos/seed/placeholder/400/400',
                   condition: p.condition as any,
                   category: CATEGORIES.find(c => c.id === p.category)?.name || p.category
                 }} />
@@ -138,7 +155,7 @@ function ProductsContent() {
             </div>
           ) : (
             <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-muted-foreground/30">
-              <p className="text-xl font-bold text-muted-foreground">Aucun article disponible pour le moment.</p>
+              <p className="text-xl font-bold text-muted-foreground">Aucun article trouvé.</p>
               <Button variant="link" className="text-primary font-bold mt-2" onClick={() => {setSearchQuery(''); setSelectedCategory(null);}}>
                 Réinitialiser les filtres
               </Button>
