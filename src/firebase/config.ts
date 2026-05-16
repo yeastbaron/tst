@@ -1,8 +1,8 @@
 
 /**
  * Firebase configuration for SalleDeVente.sn
- * FORCE_REDEPLOY_ID: v11-Global-Diagnostic-Reset
- * Description: Redirection vers l'instance (default) et réinitialisation des règles.
+ * SYNC_VERSION: 2024-05-16-v2-Marketplace-Full-Reset
+ * This file is updated to trigger a full redeployment of security rules.
  */
 export const firebaseConfig = {
   apiKey: "AIzaSyBqF9OUEd6-ldEa8oNUKAYev1CWelI-flU",

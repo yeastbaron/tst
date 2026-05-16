@@ -39,11 +39,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": { "$ref": "#/backend/entities/UserProfile" },
-      "description": "User profiles access. READ: Any authenticated user. WRITE: Owner or admin ndaw22@gmail.com."
+      "description": "Allow read for any signed-in user. Allow create for any signed-in user. Allow update for the owner or admin ndaw22@gmail.com."
     },
     "/products/{productId}": {
       "schema": { "$ref": "#/backend/entities/Product" },
-      "description": "Marketplace ads. READ: Public. CREATE: Authenticated user. UPDATE/DELETE: Seller or admin ndaw22@gmail.com."
+      "description": "Public Read Access. Allow get and list for anyone. Allow create for any signed-in user. Allow update and delete for the seller or admin ndaw22@gmail.com."
     }
   }
 }
