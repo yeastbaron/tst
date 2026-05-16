@@ -1,0 +1,59 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "logo",
+      "description": "Logo Officiel SalleDeVente.sn",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-1995117372-94954.firebasestorage.app/o/Logo%20SDV%20Original.png?alt=media&token=62914fad-dd51-4c38-b012-92eea10dda61",
+      "imageHint": "company logo"
+    },
+    {
+      "id": "electronics",
+      "description": "Latest smartphones and laptops",
+      "imageUrl": "https://picsum.photos/seed/elec1/800/600",
+      "imageHint": "smartphone laptop"
+    },
+    {
+      "id": "fashion",
+      "description": "Trendy clothes and accessories",
+      "imageUrl": "https://picsum.photos/seed/fash1/800/600",
+      "imageHint": "clothing fashion"
+    },
+    {
+      "id": "home",
+      "description": "Modern home furniture",
+      "imageUrl": "https://picsum.photos/seed/furn1/800/600",
+      "imageHint": "furniture interior"
+    },
+    {
+      "id": "cars",
+      "description": "Quality used vehicles",
+      "imageUrl": "https://picsum.photos/seed/car1/800/600",
+      "imageHint": "car vehicle"
+    },
+    {
+      "id": "beauty",
+      "description": "Beauty and wellness products",
+      "imageUrl": "https://picsum.photos/seed/beauty1/800/600",
+      "imageHint": "cosmetics beauty"
+    },
+    {
+      "id": "sports",
+      "description": "Sports and fitness gear",
+      "imageUrl": "https://picsum.photos/seed/sports1/800/600",
+      "imageHint": "fitness sports"
+    },
+    {
+      "id": "pro",
+      "description": "Professional tools and equipment",
+      "imageUrl": "https://picsum.photos/seed/pro1/800/600",
+      "imageHint": "tools industrial"
+    },
+    {
+      "id": "ad-banner",
+      "description": "Publicité commerciale",
+      "imageUrl": "https://picsum.photos/seed/adsense/1200/200",
+      "imageHint": "advertisement banner"
+    }
+  ]
+}

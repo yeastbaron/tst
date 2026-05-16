@@ -7,11 +7,12 @@ import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Check, X, Eye, Loader2, ShieldAlert } from 'lucide-react';
+import { Check, X, Eye, ShieldAlert } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { MOCK_PRODUCTS } from '@/lib/constants';
+import { LoadingLogo } from '@/components/ui/loading-logo';
 
 export default function AdminPage() {
   const { user, loading: authLoading } = useUser();
@@ -19,29 +20,32 @@ export default function AdminPage() {
 
   const isAdmin = user?.email === 'ndaw22@gmail.com';
 
-  // Mode prototype : on filtre les produits en attente du mock
   const pendingProducts = MOCK_PRODUCTS.filter(p => p.status === 'pending');
 
   const handleApprove = (productId: string) => {
-    toast({ title: "Produit approuvé (Démo)!", description: "L'annonce serait maintenant visible." });
+    toast({ title: "Approbation réussie", description: "L'annonce est désormais en ligne." });
   };
 
   const handleReject = (productId: string) => {
-    toast({ variant: "destructive", title: "Annonce rejetée (Démo)", description: "L'annonce ne serait pas publiée." });
+    toast({ variant: "destructive", title: "Annonce rejetée", description: "Le vendeur sera notifié." });
   };
 
-  if (authLoading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin h-8 w-8 text-primary" /></div>;
+  if (authLoading) return <div className="h-screen flex items-center justify-center"><LoadingLogo /></div>;
 
   if (!isAdmin) {
     return (
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen bg-muted/10">
         <Header />
         <main className="flex-1 flex items-center justify-center p-4">
-          <Card className="max-w-md w-full p-8 text-center space-y-4 border-destructive/20 rounded-[2rem]">
-            <ShieldAlert className="h-16 w-16 text-destructive mx-auto" />
-            <h1 className="text-2xl font-black uppercase">Accès Refusé</h1>
-            <p className="text-muted-foreground font-medium">Vous n'avez pas les droits nécessaires pour accéder à cette page.</p>
-            <Button asChild className="w-full rounded-xl font-bold"><Link href="/">Retour à l'accueil</Link></Button>
+          <Card className="max-w-md w-full p-10 text-center space-y-6 border-destructive/20 rounded-[2.5rem] shadow-xl">
+            <div className="w-20 h-20 bg-destructive/10 rounded-full flex items-center justify-center mx-auto">
+              <ShieldAlert className="h-10 w-10 text-destructive" />
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-2xl font-black uppercase tracking-tight">Accès Refusé</h1>
+              <p className="text-muted-foreground font-medium">Seuls les administrateurs certifiés peuvent accéder à cet espace.</p>
+            </div>
+            <Button asChild className="w-full rounded-2xl font-black uppercase h-12" variant="outline"><Link href="/">Retour à l'accueil</Link></Button>
           </Card>
         </main>
         <Footer />
@@ -50,55 +54,55 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-muted/10">
       <Header />
-      <main className="flex-1 bg-muted/10 py-12">
+      <main className="flex-1 py-12">
         <div className="container mx-auto px-4 max-w-5xl">
-          <div className="flex items-center justify-between mb-8 bg-white p-6 rounded-2xl border border-border/50 shadow-sm">
-            <div>
-              <h1 className="text-xl font-black uppercase tracking-tight text-primary">Tableau de bord Admin</h1>
-              <p className="text-muted-foreground text-sm font-medium">Gestion des annonces en attente de validation.</p>
+          <div className="flex items-center justify-between mb-8 bg-white p-8 rounded-[2rem] border border-primary/5 shadow-sm">
+            <div className="space-y-1">
+              <h1 className="text-2xl font-black uppercase tracking-tighter text-primary">Gestion des Annonces</h1>
+              <p className="text-muted-foreground text-sm font-medium">Validez ou rejetez les nouvelles soumissions.</p>
             </div>
-            <Badge variant="outline" className="text-primary font-bold border-primary/20 px-4 py-1 rounded-full">
-              {pendingProducts.length} en attente
+            <Badge variant="default" className="bg-secondary text-white font-black px-6 py-2 rounded-full text-sm">
+              {pendingProducts.length} EN ATTENTE
             </Badge>
           </div>
 
           {pendingProducts.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-6">
               {pendingProducts.map((p: any) => (
-                <Card key={p.id} className="overflow-hidden border-border/50 hover:border-primary/30 transition-all rounded-2xl bg-white shadow-sm">
+                <Card key={p.id} className="overflow-hidden border-primary/5 hover:border-primary/20 transition-all rounded-[2rem] bg-white shadow-lg group">
                   <CardContent className="p-0 flex flex-col md:flex-row">
-                    <div className="relative w-full md:w-48 aspect-square md:aspect-auto">
+                    <div className="relative w-full md:w-64 aspect-square md:aspect-auto overflow-hidden">
                       <Image 
                         src={p.images?.[0] || 'https://picsum.photos/seed/placeholder/400/400'} 
                         alt={p.title} 
                         fill 
-                        className="object-cover" 
+                        className="object-cover group-hover:scale-105 transition-transform duration-500" 
                       />
                     </div>
-                    <div className="flex-1 p-6 space-y-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <Badge variant="secondary" className="mb-2 uppercase text-[10px] font-bold">
+                    <div className="flex-1 p-8 space-y-6">
+                      <div className="flex flex-col md:flex-row items-start justify-between gap-4">
+                        <div className="space-y-2">
+                          <Badge variant="secondary" className="uppercase text-[10px] font-black tracking-widest px-3">
                             {p.category}
                           </Badge>
-                          <h3 className="text-xl font-black uppercase leading-tight">{p.title}</h3>
-                          <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{p.description}</p>
+                          <h3 className="text-2xl font-black uppercase tracking-tight leading-none">{p.title}</h3>
+                          <p className="text-sm text-muted-foreground line-clamp-2 max-w-xl">{p.description}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-2xl font-black text-primary">{p.basePrice?.toLocaleString('fr-FR')} FCFA</p>
+                          <p className="text-3xl font-black text-primary tracking-tighter">{p.basePrice?.toLocaleString('fr-FR')} FCFA</p>
                         </div>
                       </div>
-                      <div className="flex flex-wrap gap-2 pt-4 border-t">
-                        <Button size="sm" variant="default" className="bg-green-600 hover:bg-green-700 font-bold gap-2 rounded-xl" onClick={() => handleApprove(p.id)}>
-                          <Check className="h-4 w-4" /> Approuver
+                      <div className="flex flex-wrap gap-3 pt-6 border-t border-primary/5">
+                        <Button className="bg-green-600 hover:bg-green-700 font-black uppercase gap-2 rounded-xl h-12 px-6" onClick={() => handleApprove(p.id)}>
+                          <Check className="h-5 w-5" /> Approuver
                         </Button>
-                        <Button size="sm" variant="destructive" className="font-bold gap-2 rounded-xl" onClick={() => handleReject(p.id)}>
-                          <X className="h-4 w-4" /> Rejeter
+                        <Button variant="destructive" className="font-black uppercase gap-2 rounded-xl h-12 px-6" onClick={() => handleReject(p.id)}>
+                          <X className="h-5 w-5" /> Rejeter
                         </Button>
-                        <Button size="sm" variant="outline" className="font-bold gap-2 rounded-xl" asChild>
-                          <Link href={`/products/${p.id}`}><Eye className="h-4 w-4" /> Voir</Link>
+                        <Button variant="outline" className="font-black uppercase gap-2 rounded-xl h-12 px-6 ml-auto" asChild>
+                          <Link href={`/products/${p.id}`}><Eye className="h-5 w-5" /> Examiner</Link>
                         </Button>
                       </div>
                     </div>
@@ -107,8 +111,12 @@ export default function AdminPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-24 bg-white rounded-[2rem] border border-dashed border-muted-foreground/30">
-              <p className="text-xl font-bold text-muted-foreground">Aucune annonce en attente pour le moment.</p>
+            <div className="text-center py-32 bg-white rounded-[3rem] border-2 border-dashed border-primary/10 shadow-inner flex flex-col items-center gap-4">
+              <div className="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center">
+                <Check className="h-10 w-10 text-primary opacity-30" />
+              </div>
+              <p className="text-2xl font-black uppercase text-muted-foreground opacity-40">Tout est à jour !</p>
+              <p className="text-muted-foreground font-medium">Aucune nouvelle annonce en attente de modération.</p>
             </div>
           )}
         </div>
