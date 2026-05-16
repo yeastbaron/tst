@@ -1,6 +1,6 @@
 
 // Firebase configuration for SalleDeVente.sn
-// Security Rules Refresh: v6 (Ensuring public read access for products and auth create)
+// Security Rules Refresh: v8 (Explicitly allowing authenticated creates for products)
 export const firebaseConfig = {
   apiKey: "AIzaSyBqF9OUEd6-ldEa8oNUKAYev1CWelI-flU",
   authDomain: "studio-1995117372-94954.firebaseapp.com",
