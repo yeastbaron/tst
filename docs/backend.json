@@ -39,11 +39,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": { "$ref": "#/backend/entities/UserProfile" },
-      "description": "User profiles. Read: any authenticated user. Write: owner (auth.uid == userId) or admin (ndaw22@gmail.com)."
+      "description": "User profiles. Anyone authenticated can read. Only the owner (auth.uid == userId) or admin ndaw22@gmail.com can write."
     },
     "/products/{productId}": {
       "schema": { "$ref": "#/backend/entities/Product" },
-      "description": "Product listings. Publicly readable. Creation allowed for all authenticated users. Updates and deletions restricted to the seller (owner) or admin (ndaw22@gmail.com)."
+      "description": "Product listings. Publicly readable by anyone. Any authenticated user can create a product. Only the seller (resource.data.sellerId == auth.uid) or admin ndaw22@gmail.com can update or delete."
     }
   }
 }
