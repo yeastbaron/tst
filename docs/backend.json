@@ -39,11 +39,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": { "$ref": "#/backend/entities/UserProfile" },
-      "description": "User profile data. Anyone authenticated can read. Only the owner (where userId matches auth.uid) or the admin ndaw22@gmail.com can write."
+      "description": "User profile access. READ: Any authenticated user can read profiles. WRITE: Only the owner (userId matches auth.uid) or the admin ndaw22@gmail.com can write."
     },
     "/products/{productId}": {
       "schema": { "$ref": "#/backend/entities/Product" },
-      "description": "Product listings for sale. Publicly readable by anyone. Any authenticated user can create a product document. Update and delete are restricted to the seller (sellerId field must match auth.uid) or the admin ndaw22@gmail.com."
+      "description": "Marketplace ads. READ: Public access for everyone. CREATE: Any authenticated user can create an ad. UPDATE/DELETE: Only the seller (sellerId field matches auth.uid) or the admin ndaw22@gmail.com can update or delete."
     }
   }
 }
