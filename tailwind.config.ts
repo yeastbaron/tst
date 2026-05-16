@@ -13,6 +13,7 @@ export default {
       fontFamily: {
         body: ['Oxanium', 'sans-serif'],
         headline: ['Oxanium', 'sans-serif'],
+        bebas: ['Bebas Neue', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {

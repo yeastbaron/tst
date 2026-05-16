@@ -70,12 +70,14 @@ export default function ProfilePage() {
   return (
     <div className="flex flex-col min-h-screen bg-muted/10">
       <Header />
-      <main className="flex-1 py-12">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="bg-white p-4 md:p-6 rounded-xl border border-border/50 mb-8 flex items-center gap-4">
-            <h1 className="text-lg md:text-xl font-normal tracking-wide uppercase">Mon Profil</h1>
+      <main className="flex-1">
+        <div className="w-full bg-muted border-y border-border/50 py-3">
+          <div className="container mx-auto px-4">
+            <h1 className="text-[14px] font-bebas tracking-[0.1em] uppercase">Mon Profil Utilisateur</h1>
           </div>
+        </div>
 
+        <div className="container mx-auto px-4 py-12 max-w-4xl">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card className="md:col-span-1 border-border/50 rounded-[2rem] overflow-hidden shadow-sm h-fit bg-white">
               <CardContent className="p-8 text-center space-y-4">

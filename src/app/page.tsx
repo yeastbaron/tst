@@ -23,15 +23,15 @@ export default function Home() {
           <AdBanner />
         </div>
 
-        <section className="py-8 md:py-10">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-6 bg-muted/60 p-3 md:p-4 rounded-xl border border-border/50">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-secondary fill-secondary" />
-                <h2 className="text-lg md:text-xl font-normal tracking-wide uppercase">Articles à la Une</h2>
-              </div>
+        <section className="mt-8">
+          <div className="w-full bg-muted border-y border-border/50 py-3">
+            <div className="container mx-auto px-4 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary fill-primary" />
+              <h2 className="text-[14px] font-bebas tracking-[0.1em] uppercase">Articles à la Une</h2>
             </div>
+          </div>
 
+          <div className="container mx-auto px-4 py-8">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
               {activeProducts.map((p: any) => (
                 <ProductCard key={p.id} product={{
@@ -47,12 +47,14 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-8 border-t bg-muted/5">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-6 bg-muted p-3 md:p-4 rounded-xl border border-border/50">
-              <h2 className="text-lg md:text-xl font-normal tracking-wide uppercase">Catégories</h2>
+        <section>
+          <div className="w-full bg-muted border-y border-border/50 py-3">
+            <div className="container mx-auto px-4">
+              <h2 className="text-[14px] font-bebas tracking-[0.1em] uppercase">Catégories</h2>
             </div>
-            
+          </div>
+          
+          <div className="container mx-auto px-4 py-8">
             <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-4">
               {CATEGORIES.map((cat) => (
                 <Link key={cat.id} href={`/products?category=${cat.id}`} className="group flex flex-col">
@@ -65,8 +67,8 @@ export default function Home() {
                       sizes="(max-width: 768px) 33vw, 15vw"
                     />
                     <div className="absolute inset-0 bg-black/20" />
-                    <div className="absolute inset-0 flex items-center justify-center p-2">
-                       <span className="text-white text-[10px] sm:text-xs font-black uppercase text-center leading-tight drop-shadow-md">
+                    <div className="absolute inset-0 flex items-center justify-center p-2 text-center">
+                       <span className="text-white text-[14px] font-bebas uppercase tracking-wider drop-shadow-md">
                          {cat.name}
                        </span>
                     </div>

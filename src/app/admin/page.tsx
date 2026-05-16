@@ -42,7 +42,7 @@ export default function AdminPage() {
               <ShieldAlert className="h-10 w-10 text-destructive" />
             </div>
             <div className="space-y-2">
-              <h1 className="text-2xl font-black uppercase tracking-tight">Accès Refusé</h1>
+              <h1 className="text-2xl font-black uppercase tracking-tight text-destructive">Accès Refusé</h1>
               <p className="text-muted-foreground font-medium">Seuls les administrateurs certifiés peuvent accéder à cet espace.</p>
             </div>
             <Button asChild className="w-full rounded-2xl font-black uppercase h-12" variant="outline"><Link href="/">Retour à l'accueil</Link></Button>
@@ -56,18 +56,20 @@ export default function AdminPage() {
   return (
     <div className="flex flex-col min-h-screen bg-muted/10">
       <Header />
-      <main className="flex-1 py-12">
-        <div className="container mx-auto px-4 max-w-5xl">
-          <div className="flex items-center justify-between mb-8 bg-white p-8 rounded-[2rem] border border-primary/5 shadow-sm">
-            <div className="space-y-1">
-              <h1 className="text-2xl font-black uppercase tracking-tighter text-primary">Gestion des Annonces</h1>
-              <p className="text-muted-foreground text-sm font-medium">Validez ou rejetez les nouvelles soumissions.</p>
+      <main className="flex-1">
+        <div className="w-full bg-muted border-y border-border/50 py-3">
+          <div className="container mx-auto px-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <h1 className="text-[14px] font-bebas tracking-[0.1em] uppercase text-primary">Gestion des Annonces</h1>
+              <Badge variant="default" className="bg-primary text-white font-bebas text-[10px] px-2 py-0 h-4 rounded-none">
+                {pendingProducts.length} EN ATTENTE
+              </Badge>
             </div>
-            <Badge variant="default" className="bg-secondary text-white font-black px-6 py-2 rounded-full text-sm">
-              {pendingProducts.length} EN ATTENTE
-            </Badge>
+            <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest hidden sm:block">Modération SalleDeVente.sn</p>
           </div>
+        </div>
 
+        <div className="container mx-auto px-4 py-12 max-w-5xl">
           {pendingProducts.length > 0 ? (
             <div className="grid grid-cols-1 gap-6">
               {pendingProducts.map((p: any) => (

@@ -106,21 +106,23 @@ function ProductsContent() {
         <AdBanner className="mb-8" />
       </div>
 
-      <section className="py-4">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8 bg-muted p-3 md:p-4 rounded-xl border border-border/50">
-            <h1 className="text-lg md:text-xl font-normal tracking-wide uppercase">
+      <section>
+        <div className="w-full bg-muted border-y border-border/50 py-3">
+          <div className="container mx-auto px-4 flex items-center justify-between">
+            <h1 className="text-[14px] font-bebas tracking-[0.1em] uppercase">
               {selectedCategory ? CATEGORIES.find(c => c.id === selectedCategory)?.name : 'Tous les articles'}
-              <span className="ml-2 text-muted-foreground font-medium normal-case text-base">
+              <span className="ml-2 font-body font-medium normal-case text-xs text-muted-foreground opacity-60">
                 ({filteredProducts.length})
               </span>
             </h1>
             
-            <Button variant="ghost" className="font-bold flex items-center gap-2 text-primary">
-              <SlidersHorizontal className="h-5 w-5" /> <span className="hidden sm:inline">Trier</span>
+            <Button variant="ghost" size="sm" className="font-bebas text-[14px] tracking-widest flex items-center gap-2 text-primary p-0 h-auto">
+              <SlidersHorizontal className="h-4 w-4" /> <span className="hidden sm:inline">Trier</span>
             </Button>
           </div>
+        </div>
 
+        <div className="container mx-auto px-4 py-8">
           {filteredProducts.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
               {filteredProducts.map((p: any) => (

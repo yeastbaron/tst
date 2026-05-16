@@ -61,18 +61,17 @@ export default function MyListingsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-muted/10">
       <Header />
-      <main className="flex-1 py-12">
-        <div className="container mx-auto px-4 max-w-5xl">
-          <div className="flex items-center justify-between mb-8 bg-white p-6 rounded-2xl border border-border/50 shadow-sm">
-            <div>
-              <h1 className="text-xl font-normal uppercase tracking-tight text-primary">Mes Annonces</h1>
-              <p className="text-muted-foreground text-sm font-medium">Gérez vos articles en vente sur SalleDeVente.sn</p>
-            </div>
-            <Button asChild className="rounded-xl font-bold gap-2">
+      <main className="flex-1">
+        <div className="w-full bg-muted border-y border-border/50 py-3">
+          <div className="container mx-auto px-4 flex items-center justify-between">
+            <h1 className="text-[14px] font-bebas tracking-[0.1em] uppercase text-primary">Mes Annonces</h1>
+            <Button asChild size="sm" className="rounded-xl font-bebas text-[14px] tracking-widest gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/90 px-4">
               <Link href="/sell"><PlusCircle className="h-4 w-4" /> Vendre un article</Link>
             </Button>
           </div>
+        </div>
 
+        <div className="container mx-auto px-4 py-12 max-w-5xl">
           {listings && listings.length > 0 ? (
             <div className="grid grid-cols-1 gap-6">
               {listings.map((item: any) => (
