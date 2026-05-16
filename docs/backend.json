@@ -2,8 +2,8 @@
 {
   "entities": {
     "UserProfile": {
-      "title": "Profil Utilisateur",
-      "description": "Données de compte des utilisateurs enregistrées dans Firestore.",
+      "title": "User Profile",
+      "description": "Essential user account data for SalleDeVente.sn.",
       "type": "object",
       "properties": {
         "uid": { "type": "string" },
@@ -16,8 +16,8 @@
       "required": ["uid", "email"]
     },
     "Product": {
-      "title": "Produit",
-      "description": "Annonce de produit déposée par un vendeur.",
+      "title": "Marketplace Product",
+      "description": "Product listing for the marketplace.",
       "type": "object",
       "properties": {
         "title": { "type": "string" },
@@ -39,11 +39,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": { "$ref": "#/backend/entities/UserProfile" },
-      "description": "User profile access. READ: Any authenticated user can read profiles. WRITE: Only the owner (userId matches auth.uid) or the admin ndaw22@gmail.com can write."
+      "description": "User profiles access. READ: Any authenticated user. WRITE: Owner or admin ndaw22@gmail.com."
     },
     "/products/{productId}": {
       "schema": { "$ref": "#/backend/entities/Product" },
-      "description": "Marketplace ads. READ: Public access for everyone. CREATE: Any authenticated user can create an ad. UPDATE/DELETE: Only the seller (sellerId field matches auth.uid) or the admin ndaw22@gmail.com can update or delete."
+      "description": "Marketplace ads. READ: Public. CREATE: Authenticated user. UPDATE/DELETE: Seller or admin ndaw22@gmail.com."
     }
   }
 }

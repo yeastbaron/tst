@@ -6,17 +6,17 @@ import { firebaseConfig } from './config';
 
 export function initializeFirebase() {
   try {
-    const existingApp = getApps().length > 0 ? getApp() : null;
-    const app = existingApp || initializeApp(firebaseConfig);
+    // Évite les erreurs d'initialisation multiple en vérifiant l'existence d'une app
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     
-    // IMPORTANT : On utilise l'instance (default) pour garantir que les règles 
-    // de sécurité définies dans backend.json sont bien appliquées.
+    // Utilise explicitement l'instance par défaut pour s'assurer que les règles SalleDeVente sont appliquées
     const db = getFirestore(app);
     const auth = getAuth(app);
     
     return { app, db, auth };
   } catch (error) {
-    console.error("Erreur critique lors de l'initialisation de Firebase:", error);
+    console.error("Erreur critique d'initialisation Firebase:", error);
+    // Retourne un objet vide structuré pour ne pas faire planter le client-provider
     return { 
       app: null as unknown as FirebaseApp, 
       db: null as unknown as Firestore, 
