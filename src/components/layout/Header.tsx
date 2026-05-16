@@ -11,7 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { CATEGORIES } from '@/lib/constants';
 import { useUser, useAuth, useFirestore } from '@/firebase';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
@@ -37,26 +37,22 @@ export function Header() {
     setMounted(true);
   }, []);
 
-  const handleLogin = async () => {
-    if (!auth || !db) return;
-
-    const provider = new GoogleAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      
+  // Synchronisation du profil utilisateur lors de la connexion
+  useEffect(() => {
+    if (user && db) {
+      const userRef = doc(db, 'users', user.uid);
       const userData = {
-        uid: result.user.uid,
-        email: result.user.email,
-        displayName: result.user.displayName,
-        photoURL: result.user.photoURL,
-        role: result.user.email === 'ndaw22@gmail.com' ? 'admin' : 'user',
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        role: user.email === 'ndaw22@gmail.com' ? 'admin' : 'user',
         lastLogin: new Date().toISOString()
       };
-
-      const userRef = doc(db, 'users', result.user.uid);
       
       setDoc(userRef, userData, { merge: true })
         .catch(async () => {
+          // On n'émet l'erreur que si ce n'est pas un problème de propagation initiale
           const permissionError = new FirestorePermissionError({
             path: userRef.path,
             operation: 'write',
@@ -64,7 +60,15 @@ export function Header() {
           });
           errorEmitter.emit('permission-error', permissionError);
         });
+    }
+  }, [user, db]);
 
+  const handleLogin = async () => {
+    if (!auth || !db) return;
+
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
       toast({
         title: "Connexion réussie",
         description: `Bienvenue, ${result.user.displayName} !`,
@@ -75,7 +79,6 @@ export function Header() {
       }
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') return;
-      
       toast({
         variant: "destructive",
         title: "Erreur de connexion",
@@ -111,8 +114,8 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] p-0">
-              <SheetTitle className="sr-only">Menu</SheetTitle>
-              <SheetDescription className="sr-only">Navigation catégories</SheetDescription>
+              <SheetTitle className="sr-only">Menu de navigation</SheetTitle>
+              <SheetDescription className="sr-only">Accédez aux catégories et services</SheetDescription>
               <ScrollArea className="h-full px-6 py-8">
                 <nav className="flex flex-col gap-4">
                   <Link href="/" className="text-lg font-bold">Accueil</Link>

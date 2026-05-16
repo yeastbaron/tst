@@ -39,11 +39,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": "#/backend/entities/UserProfile",
-      "description": "L'utilisateur et l'admin ndaw22@gmail.com ont un accès complet. ALLOW READ, WRITE: if request.auth != null && (request.auth.uid == userId || request.auth.token.email == 'ndaw22@gmail.com')"
+      "description": "Anyone can read user profiles. Only the owner (userId matches auth.uid) or the admin ndaw22@gmail.com can write. ALLOW READ: if true; ALLOW WRITE: if request.auth != null && (request.auth.uid == userId || request.auth.token.email == 'ndaw22@gmail.com')"
     },
     "/products/{productId}": {
       "schema": "#/backend/entities/Product",
-      "description": "LECTURE PUBLIQUE : Tout le monde peut lister (list) et lire (get) si le statut est 'active'. PROPRIÉTAIRE : L'utilisateur (sellerId) peut créer, modifier et supprimer ses produits. ADMIN : ndaw22@gmail.com a tous les droits. ALLOW READ: if resource.data.status == 'active' || (request.auth != null && (request.auth.uid == resource.data.sellerId || request.auth.token.email == 'ndaw22@gmail.com')); ALLOW CREATE: if request.auth != null; ALLOW UPDATE, DELETE: if request.auth != null && (request.auth.uid == resource.data.sellerId || request.auth.token.email == 'ndaw22@gmail.com')"
+      "description": "Public read for active products. Authenticated users can create. Owners or admin ndaw22@gmail.com can update/delete. ALLOW READ: if resource.data.status == 'active' || (request.auth != null && (request.auth.uid == resource.data.sellerId || request.auth.token.email == 'ndaw22@gmail.com')); ALLOW CREATE: if request.auth != null; ALLOW UPDATE, DELETE: if request.auth != null && (request.auth.uid == resource.data.sellerId || request.auth.token.email == 'ndaw22@gmail.com')"
     }
   }
 }
