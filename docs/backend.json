@@ -38,12 +38,12 @@
   },
   "firestore": {
     "/users/{userId}": {
-      "schema": "#/backend/entities/UserProfile",
-      "description": "Accès Profil. Lecture: Tout utilisateur authentifié. Écriture: Le propriétaire (auth.uid == userId) ou l'admin (ndaw22@gmail.com)."
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profiles. Read: Any authenticated user. Write: Owner (auth.uid == userId) or Admin (ndaw22@gmail.com)."
     },
     "/products/{productId}": {
-      "schema": "#/backend/entities/Product",
-      "description": "Annonces produits. Lecture publique autorisée pour TOUS (get et list). Création: Tout utilisateur authentifié. Modification/Suppression: Le vendeur ou l'admin (ndaw22@gmail.com)."
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Product listings. Read: anyone (public). Create: authenticated users. Update/Delete: seller or admin (ndaw22@gmail.com)."
     }
   }
 }

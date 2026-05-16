@@ -1,6 +1,6 @@
 
 // Firebase configuration for SalleDeVente.sn
-// Mise à jour des règles de sécurité : Autorisation de lecture publique pour 'products'
+// Security Rules Refresh: v2 (Force public read for products)
 export const firebaseConfig = {
   apiKey: "AIzaSyBqF9OUEd6-ldEa8oNUKAYev1CWelI-flU",
   authDomain: "studio-1995117372-94954.firebaseapp.com",
