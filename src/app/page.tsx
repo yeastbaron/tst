@@ -46,8 +46,9 @@ export default function Home() {
                     "w-8 h-8 flex items-center justify-center rounded-md transition-all",
                     productCols === 2 ? "bg-primary text-white" : "bg-white/50 text-muted-foreground hover:bg-white"
                   )}
+                  title="Grille 2 colonnes"
                 >
-                  <span className="text-[12px] font-bebas">2</span>
+                  <Grid2X2 className="h-4 w-4" />
                 </button>
                 <button 
                   onClick={() => setProductCols(3)}
@@ -55,8 +56,9 @@ export default function Home() {
                     "w-8 h-8 flex items-center justify-center rounded-md transition-all",
                     productCols === 3 ? "bg-primary text-white" : "bg-white/50 text-muted-foreground hover:bg-white"
                   )}
+                  title="Grille 3 colonnes"
                 >
-                  <span className="text-[12px] font-bebas">3</span>
+                  <Grid3X3 className="h-4 w-4" />
                 </button>
               </div>
             </div>
@@ -96,8 +98,9 @@ export default function Home() {
                     "w-8 h-8 flex items-center justify-center rounded-md transition-all",
                     categoryCols === 3 ? "bg-primary text-white" : "bg-white/50 text-muted-foreground hover:bg-white"
                   )}
+                  title="Grille 3 colonnes"
                 >
-                  <span className="text-[12px] font-bebas">3</span>
+                  <Grid3X3 className="h-4 w-4" />
                 </button>
                 <button 
                   onClick={() => setCategoryCols(4)}
@@ -105,8 +108,9 @@ export default function Home() {
                     "w-8 h-8 flex items-center justify-center rounded-md transition-all",
                     categoryCols === 4 ? "bg-primary text-white" : "bg-white/50 text-muted-foreground hover:bg-white"
                   )}
+                  title="Grille 4 colonnes"
                 >
-                  <span className="text-[12px] font-bebas">4</span>
+                  <LayoutGrid className="h-4 w-4" />
                 </button>
               </div>
             </div>
