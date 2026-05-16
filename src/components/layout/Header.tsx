@@ -9,14 +9,11 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { CATEGORIES } from '@/lib/constants';
-import { useUser, useAuth, useFirestore } from '@/firebase';
+import { useUser, useAuth } from '@/firebase';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,7 +26,6 @@ export function Header() {
   const [mounted, setMounted] = useState(false);
   const { user, loading } = useUser();
   const auth = useAuth();
-  const db = useFirestore();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -37,33 +33,8 @@ export function Header() {
     setMounted(true);
   }, []);
 
-  // Synchronisation du profil utilisateur lors de la connexion
-  useEffect(() => {
-    if (user && db) {
-      const userRef = doc(db, 'users', user.uid);
-      const userData = {
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-        role: user.email === 'ndaw22@gmail.com' ? 'admin' : 'user',
-        lastLogin: new Date().toISOString()
-      };
-      
-      setDoc(userRef, userData, { merge: true })
-        .catch(async () => {
-          const permissionError = new FirestorePermissionError({
-            path: userRef.path,
-            operation: 'write',
-            requestResourceData: userData,
-          });
-          errorEmitter.emit('permission-error', permissionError);
-        });
-    }
-  }, [user, db]);
-
   const handleLogin = async () => {
-    if (!auth || !db) return;
+    if (!auth) return;
 
     const provider = new GoogleAuthProvider();
     try {

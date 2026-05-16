@@ -12,17 +12,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CATEGORIES, COMMISSION_RATE } from '@/lib/constants';
 import { Camera, X, Loader2, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore, useUser } from '@/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
 
 export default function SellPage() {
   const { toast } = useToast();
   const router = useRouter();
   const { user, loading } = useUser();
-  const db = useFirestore();
   
   const [images, setImages] = useState<string[]>([]);
   const [title, setTitle] = useState('');
@@ -44,9 +40,7 @@ export default function SellPage() {
     if (e.target.files) {
       const files = Array.from(e.target.files).slice(0, 10 - images.length);
       files.forEach(file => {
-        // Validation simple du type de fichier
         if (!file.type.startsWith('image/')) return;
-        
         const reader = new FileReader();
         reader.onloadend = () => {
           setImages(prev => [...prev, reader.result as string]);
@@ -62,14 +56,7 @@ export default function SellPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !db) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Vous devez être connecté et la base de données doit être prête.",
-      });
-      return;
-    }
+    if (!user) return;
 
     if (images.length === 0) {
       toast({
@@ -82,37 +69,15 @@ export default function SellPage() {
 
     setIsSubmitting(true);
 
-    const productData = {
-      title,
-      description,
-      basePrice: parseFloat(price),
-      category,
-      condition,
-      images,
-      sellerId: user.uid,
-      status: 'pending',
-      createdAt: serverTimestamp(),
-    };
-
-    addDoc(collection(db, 'products'), productData)
-      .then(() => {
-        toast({
-          title: "Annonce soumise !",
-          description: "Notre équipe va valider votre article sous 24h.",
-        });
-        router.push('/my-listings');
-      })
-      .catch(async (error) => {
-        setIsSubmitting(false);
-        console.error("Erreur lors de la publication:", error);
-        
-        const permissionError = new FirestorePermissionError({
-          path: 'products',
-          operation: 'create',
-          requestResourceData: productData,
-        });
-        errorEmitter.emit('permission-error', permissionError);
+    // Simulation de succès pour le prototypage
+    setTimeout(() => {
+      toast({
+        title: "Annonce soumise (Démo) !",
+        description: "En mode démo, l'annonce n'est pas réellement enregistrée.",
       });
+      setIsSubmitting(false);
+      router.push('/my-listings');
+    }, 1500);
   };
 
   if (loading) {
@@ -164,11 +129,6 @@ export default function SellPage() {
                     </label>
                   )}
                 </div>
-                {images.length === 0 && (
-                  <div className="flex items-center gap-2 text-destructive text-xs font-bold uppercase">
-                    <AlertCircle className="h-4 w-4" /> Au moins une photo requise
-                  </div>
-                )}
               </div>
 
               <div className="space-y-6">

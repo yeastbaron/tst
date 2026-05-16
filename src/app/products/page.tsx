@@ -12,9 +12,15 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, SlidersHorizontal, Loader2, Sparkles, X } from 'lucide-react';
 import { smartProductSearch } from '@/ai/flows/smart-product-search-flow';
-import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where, orderBy } from 'firebase/firestore';
-import { cn } from '@/lib/utils';
+
+// Données statiques
+const MOCK_PRODUCTS = [
+  { id: '1', title: 'iPhone 13 Pro Max - 256Go', basePrice: 450000, condition: 'used', category: 'electronics', images: ['https://picsum.photos/seed/iphone/800/800'] },
+  { id: '2', title: 'MacBook Air M2 2023', basePrice: 750000, condition: 'new', category: 'electronics', images: ['https://picsum.photos/seed/macbook/800/800'] },
+  { id: '3', title: 'Chaussures Jordan Retro 4', basePrice: 85000, condition: 'new', category: 'fashion', images: ['https://picsum.photos/seed/jordan/800/800'] },
+  { id: '4', title: 'Canapé Scandinave 3 Places', basePrice: 150000, condition: 'new', category: 'home', images: ['https://picsum.photos/seed/sofa/800/800'] },
+  { id: '5', title: 'PlayStation 5 + 2 Manettes', basePrice: 380000, condition: 'used', category: 'sports', images: ['https://picsum.photos/seed/ps5/800/800'] },
+];
 
 function ProductsContent() {
   const searchParams = useSearchParams();
@@ -23,24 +29,6 @@ function ProductsContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(initialCategory);
-  const db = useFirestore();
-
-  const productsQuery = useMemoFirebase(() => {
-    if (!db) return null;
-    let q = query(
-      collection(db, 'products'),
-      where('status', '==', 'active'),
-      orderBy('createdAt', 'desc')
-    );
-    
-    if (selectedCategory) {
-      q = query(q, where('category', '==', selectedCategory));
-    }
-    
-    return q;
-  }, [db, selectedCategory]);
-
-  const { data: allProducts, loading: productsLoading } = useCollection(productsQuery);
 
   const handleSmartSearch = async () => {
     if (!searchQuery) return;
@@ -61,10 +49,11 @@ function ProductsContent() {
     }
   };
 
-  const filteredProducts = allProducts ? allProducts.filter((p: any) => {
+  const filteredProducts = MOCK_PRODUCTS.filter((p: any) => {
+    if (selectedCategory && p.category !== selectedCategory) return false;
     if (searchQuery && !p.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
-  }) : [];
+  });
 
   return (
     <main className="flex-1 bg-muted/10 pb-20">
@@ -140,17 +129,15 @@ function ProductsContent() {
             </Button>
           </div>
 
-          {productsLoading ? (
-            <div className="flex justify-center py-24"><Loader2 className="animate-spin h-12 w-12 text-primary" /></div>
-          ) : filteredProducts.length > 0 ? (
+          {filteredProducts.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
               {filteredProducts.map((p: any) => (
                 <ProductCard key={p.id} product={{
                   id: p.id,
                   title: p.title,
                   basePrice: p.basePrice,
-                  image: p.images?.[0] || 'https://picsum.photos/seed/placeholder/400/400',
-                  condition: p.condition,
+                  image: p.images[0],
+                  condition: p.condition as any,
                   category: CATEGORIES.find(c => c.id === p.category)?.name || p.category
                 }} />
               ))}

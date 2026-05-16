@@ -39,11 +39,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": "#/backend/entities/UserProfile",
-      "description": "Lecture par tout utilisateur connecté. Écriture par le propriétaire ou l'admin. ALLOW READ: if request.auth != null; ALLOW WRITE: if request.auth != null && (request.auth.uid == userId || request.auth.token.email == 'ndaw22@gmail.com')"
+      "description": "Lecture publique pour debug. Ecriture pour tout utilisateur sur son propre document. ALLOW READ: if true; ALLOW WRITE: if request.auth != null && (request.auth.uid == userId || request.auth.token.email == 'ndaw22@gmail.com')"
     },
     "/products/{productId}": {
       "schema": "#/backend/entities/Product",
-      "description": "Lecture publique pour les produits actifs. Création par tout utilisateur connecté. Modification par le propriétaire ou l'admin. ALLOW READ: if resource.data.status == 'active' || (request.auth != null && (request.auth.uid == resource.data.sellerId || request.auth.token.email == 'ndaw22@gmail.com')); ALLOW CREATE: if request.auth != null; ALLOW UPDATE, DELETE: if request.auth != null && (request.auth.uid == resource.data.sellerId || request.auth.token.email == 'ndaw22@gmail.com')"
+      "description": "Lecture publique pour tout le monde. Ecriture pour tout utilisateur connecté. ALLOW READ: if true; ALLOW WRITE: if request.auth != null"
     }
   }
 }
