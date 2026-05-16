@@ -4,19 +4,35 @@
 import { useParams } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { calculatePriceWithCommission, CATEGORIES, MOCK_PRODUCTS } from '@/lib/constants';
+import { calculatePriceWithCommission, CATEGORIES } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ShieldCheck, Truck, Heart, Share2, Info, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, Truck, Heart, Share2, Info, ArrowLeft, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
 import Link from 'next/link';
+import { useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const [activeImage, setActiveImage] = useState(0);
+  const db = useFirestore();
 
-  const product = MOCK_PRODUCTS.find(p => p.id === id);
+  const productRef = useMemoFirebase(() => {
+    if (!db || !id) return null;
+    return doc(db, 'products', id as string);
+  }, [db, id]);
+
+  const { data: product, loading } = useDoc(productRef);
+
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -32,7 +48,7 @@ export default function ProductDetailPage() {
   }
 
   const finalPrice = calculatePriceWithCommission(product.basePrice);
-  const images = product.images;
+  const images = product.images || ['https://picsum.photos/seed/placeholder/800/800'];
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -49,6 +65,19 @@ export default function ProductDetailPage() {
               <div className="aspect-square relative rounded-[2rem] overflow-hidden bg-white border shadow-sm">
                 <Image src={images[activeImage]} alt={product.title} fill className="object-cover" />
               </div>
+              {images.length > 1 && (
+                <div className="flex gap-4 overflow-x-auto pb-2">
+                  {images.map((img: string, idx: number) => (
+                    <button 
+                      key={idx} 
+                      onClick={() => setActiveImage(idx)}
+                      className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 flex-shrink-0 ${activeImage === idx ? 'border-primary' : 'border-transparent'}`}
+                    >
+                      <Image src={img} alt="" fill className="object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="space-y-8">
@@ -101,7 +130,7 @@ export default function ProductDetailPage() {
                 <div className="bg-muted p-4 rounded-xl border">
                   <h3 className="text-lg font-normal uppercase">Description</h3>
                 </div>
-                <p className="text-lg text-muted-foreground leading-relaxed">{product.description}</p>
+                <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-wrap">{product.description}</p>
               </div>
             </div>
           </div>

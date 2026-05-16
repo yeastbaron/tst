@@ -5,17 +5,32 @@ import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
-import { CATEGORIES, MOCK_PRODUCTS } from '@/lib/constants';
+import { CATEGORIES } from '@/lib/constants';
 import { ProductCard } from '@/components/products/ProductCard';
 import { AdBanner } from '@/components/ads/AdBanner';
 import Link from 'next/link';
-import { Sparkles, Grid2X2, Grid3X3, LayoutGrid } from 'lucide-react';
+import { Sparkles, Grid2X2, Grid3X3, LayoutGrid, Loader2, PackageSearch } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, where, limit, orderBy } from 'firebase/firestore';
 
 export default function Home() {
   const [productCols, setProductCols] = useState(2);
   const [categoryCols, setCategoryCols] = useState(3);
+  const db = useFirestore();
+
+  const productsQuery = useMemoFirebase(() => {
+    if (!db) return null;
+    return query(
+      collection(db, 'products'), 
+      where('status', '==', 'active'),
+      orderBy('createdAt', 'desc'),
+      limit(12)
+    );
+  }, [db]);
+
+  const { data: products, loading } = useCollection(productsQuery);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -32,7 +47,7 @@ export default function Home() {
             <div className="container mx-auto px-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary fill-primary" />
-                <h2 className="text-[14px] font-bebas tracking-[0.1em] uppercase">Articles à la Une</h2>
+                <h2 className="text-[14px] font-bebas tracking-[0.1em] uppercase">Articles Récents</h2>
               </div>
               
               <div className="flex items-center gap-1 lg:hidden">
@@ -59,22 +74,36 @@ export default function Home() {
           </div>
 
           <div className="container mx-auto px-4 py-8">
-            <div className={cn(
-              "grid gap-3 md:gap-4",
-              productCols === 2 ? "grid-cols-2" : "grid-cols-3",
-              "md:grid-cols-4 lg:grid-cols-6"
-            )}>
-              {MOCK_PRODUCTS.map((p) => (
-                <ProductCard key={p.id} product={{
-                  id: p.id,
-                  title: p.title,
-                  basePrice: p.basePrice,
-                  image: p.images[0],
-                  condition: p.condition as any,
-                  category: CATEGORIES.find(c => c.id === p.category)?.name || p.category
-                }} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex justify-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : products && products.length > 0 ? (
+              <div className={cn(
+                "grid gap-3 md:gap-4",
+                productCols === 2 ? "grid-cols-2" : "grid-cols-3",
+                "md:grid-cols-4 lg:grid-cols-6"
+              )}>
+                {products.map((p) => (
+                  <ProductCard key={p.id} product={{
+                    id: p.id,
+                    title: p.title,
+                    basePrice: p.basePrice,
+                    image: p.images?.[0] || 'https://picsum.photos/seed/placeholder/400/400',
+                    condition: p.condition as any,
+                    category: CATEGORIES.find(c => c.id === p.category)?.name || p.category
+                  }} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20 bg-muted/30 rounded-[2rem] border border-dashed flex flex-col items-center gap-4">
+                <PackageSearch className="h-12 w-12 text-muted-foreground opacity-20" />
+                <p className="text-muted-foreground font-bold uppercase tracking-widest text-sm">Aucun article disponible pour le moment</p>
+                <Button variant="outline" className="rounded-xl font-bold" asChild>
+                  <Link href="/sell">Vendre le premier article</Link>
+                </Button>
+              </div>
+            )}
           </div>
         </section>
 
