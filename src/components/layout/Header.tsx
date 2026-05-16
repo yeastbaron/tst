@@ -10,8 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { CATEGORIES } from '@/lib/constants';
-import { useUser, useAuth } from '@/firebase';
+import { useUser, useAuth, useFirestore } from '@/firebase';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
@@ -28,6 +29,7 @@ export function Header() {
   const [mounted, setMounted] = useState(false);
   const { user, loading } = useUser();
   const auth = useAuth();
+  const db = useFirestore();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -38,15 +40,37 @@ export function Header() {
   const logoUrl = PlaceHolderImages.find(img => img.id === 'logo')?.imageUrl || '';
 
   const handleLogin = async () => {
-    if (!auth) return;
+    if (!auth || !db) return;
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
+      const loggedUser = result.user;
+
+      // Enregistrement/Vérification dans la collection users de salledevente00
+      const userRef = doc(db, 'users', loggedUser.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          uid: loggedUser.uid,
+          email: loggedUser.email,
+          CompleteName: loggedUser.displayName || '',
+          photoURL: loggedUser.photoURL || '',
+          role: loggedUser.email === 'ndaw22@gmail.com' ? 'admin' : 'user',
+          lastLogin: new Date().toISOString()
+        });
+      } else {
+        await setDoc(userRef, {
+          lastLogin: new Date().toISOString()
+        }, { merge: true });
+      }
+
       toast({
         title: "Connexion réussie",
-        description: `Bienvenue, ${result.user.displayName} !`,
+        description: `Bienvenue, ${loggedUser.displayName} !`,
       });
-      if (result.user.email === 'ndaw22@gmail.com') {
+
+      if (loggedUser.email === 'ndaw22@gmail.com') {
         router.push('/admin');
       }
     } catch (error: any) {

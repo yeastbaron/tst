@@ -1,13 +1,14 @@
 
 "use client";
 
-import { useAuth, useUser } from '@/firebase';
+import { useAuth, useUser, useFirestore } from '@/firebase';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { LogIn, ShieldCheck } from 'lucide-react';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, Suspense } from 'react';
@@ -18,6 +19,7 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 function LoginContent() {
   const { user, loading } = useUser();
   const auth = useAuth();
+  const db = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
   const searchParams = useSearchParams();
@@ -32,13 +34,34 @@ function LoginContent() {
   }, [user, loading, router, redirectTo]);
 
   const handleLogin = async () => {
-    if (!auth) return;
+    if (!auth || !db) return;
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
+      const loggedUser = result.user;
+
+      // Enregistrement/Vérification dans la collection users de salledevente00
+      const userRef = doc(db, 'users', loggedUser.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          uid: loggedUser.uid,
+          email: loggedUser.email,
+          CompleteName: loggedUser.displayName || '',
+          photoURL: loggedUser.photoURL || '',
+          role: loggedUser.email === 'ndaw22@gmail.com' ? 'admin' : 'user',
+          lastLogin: new Date().toISOString()
+        });
+      } else {
+        await setDoc(userRef, {
+          lastLogin: new Date().toISOString()
+        }, { merge: true });
+      }
+
       toast({
         title: "Bienvenue !",
-        description: `Content de vous revoir, ${result.user.displayName}`,
+        description: `Content de vous revoir, ${loggedUser.displayName}`,
       });
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') return;
@@ -65,7 +88,7 @@ function LoginContent() {
         
         <div className="space-y-6">
           <div className="relative w-48 h-20 mx-auto">
-            <Image src={logoUrl} alt="Logo" fill className="object-contain" />
+            <Image src={logoUrl} alt="Logo" fill className="object-contain" priority />
           </div>
           
           <div className="space-y-2">

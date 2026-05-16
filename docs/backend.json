@@ -3,12 +3,12 @@
   "entities": {
     "UserProfile": {
       "title": "Profil Utilisateur",
-      "description": "Données de compte des utilisateurs de la plateforme.",
+      "description": "Données de compte des utilisateurs enregistrées dans Firestore.",
       "type": "object",
       "properties": {
         "uid": { "type": "string" },
         "email": { "type": "string" },
-        "displayName": { "type": "string" },
+        "CompleteName": { "type": "string" },
         "photoURL": { "type": "string" },
         "role": { "type": "string", "enum": ["user", "admin"] },
         "lastLogin": { "type": "string", "format": "date-time" }
@@ -39,11 +39,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": "#/backend/entities/UserProfile",
-      "description": "Lecture publique pour debug. Ecriture pour tout utilisateur sur son propre document. ALLOW READ: if true; ALLOW WRITE: if request.auth != null && (request.auth.uid == userId || request.auth.token.email == 'ndaw22@gmail.com')"
+      "description": "Lecture publique autorisée. Écriture autorisée uniquement pour le propriétaire du compte. L'administrateur ndaw22@gmail.com a tous les droits. ALLOW READ: if true; ALLOW WRITE: if request.auth != null && (request.auth.uid == userId || request.auth.token.email == 'ndaw22@gmail.com')"
     },
     "/products/{productId}": {
       "schema": "#/backend/entities/Product",
-      "description": "Lecture publique pour tout le monde. Ecriture pour tout utilisateur connecté. ALLOW READ: if true; ALLOW WRITE: if request.auth != null"
+      "description": "Lecture publique pour tous les produits actifs. Écriture pour les utilisateurs connectés. ALLOW READ: if true; ALLOW WRITE: if request.auth != null"
     }
   }
 }
