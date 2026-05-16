@@ -35,7 +35,7 @@ export function Header() {
     setMounted(true);
   }, []);
 
-  const logoUrl = PlaceHolderImages.find(img => img.id === 'logo')?.imageUrl;
+  const logoUrl = PlaceHolderImages.find(img => img.id === 'logo')?.imageUrl || '';
 
   const handleLogin = async () => {
     if (!auth) return;
