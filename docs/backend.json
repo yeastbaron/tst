@@ -43,7 +43,7 @@
     },
     "/products/{productId}": {
       "schema": { "$ref": "#/backend/entities/Product" },
-      "description": "Product listings. Read: anyone (public). Create: any authenticated user. Update/Delete: owner (sellerId) or admin (ndaw22@gmail.com)."
+      "description": "Product listings. Publicly readable. Creation allowed for all authenticated users. Updates and deletions restricted to the seller (owner) or admin (ndaw22@gmail.com)."
     }
   }
 }
