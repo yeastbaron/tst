@@ -39,11 +39,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": "#/backend/entities/UserProfile",
-      "description": "Lecture publique autorisée. Écriture autorisée uniquement pour le propriétaire du compte. L'administrateur ndaw22@gmail.com a tous les droits. ALLOW READ: if true; ALLOW WRITE: if request.auth != null && (request.auth.uid == userId || request.auth.token.email == 'ndaw22@gmail.com')"
+      "description": "Règles pour la collection users : Tout utilisateur connecté peut lire n'importe quel profil. Seul le propriétaire peut écrire son propre profil. L'admin ndaw22@gmail.com a tous les droits. ALLOW READ: if request.auth != null; ALLOW WRITE: if request.auth != null && (request.auth.uid == userId || request.auth.token.email == 'ndaw22@gmail.com')"
     },
     "/products/{productId}": {
       "schema": "#/backend/entities/Product",
-      "description": "Lecture publique pour tous les produits actifs. Écriture pour les utilisateurs connectés. ALLOW READ: if true; ALLOW WRITE: if request.auth != null"
+      "description": "Règles pour les produits : Lecture publique pour tous. Écriture pour les utilisateurs connectés. ALLOW READ: if true; ALLOW WRITE: if request.auth != null"
     }
   }
 }
