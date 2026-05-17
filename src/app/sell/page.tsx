@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CATEGORIES, COMMISSION_RATE } from '@/lib/constants';
 import { Camera, X, Sparkles, Loader2, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore } from '@/firebase';
+import { useFirestore, useUser } from '@/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -22,7 +22,9 @@ import Image from 'next/image';
 export default function SellPage() {
   const { toast } = useToast();
   const db = useFirestore();
+  const { user } = useUser();
   const router = useRouter();
+
   
   const [images, setImages] = useState<string[]>([]);
   const [title, setTitle] = useState('');
@@ -68,7 +70,7 @@ export default function SellPage() {
       images,
       status: 'active', // Auto-active for now for testing
       createdAt: serverTimestamp(),
-      sellerId: 'anonymous' // Anonymous for now as requested
+      sellerId: user?.uid || 'anonymous'
     };
 
     addDoc(collection(db, 'products'), productData)
@@ -116,14 +118,9 @@ export default function SellPage() {
       <main className="flex-1 py-12">
         <div className="container mx-auto px-4 max-w-2xl">
           <div className="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-xl border border-border/50">
-            <div className="mb-10 flex justify-between items-start">
-              <div>
-                <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-primary">Vendre un article</h1>
-                <p className="text-muted-foreground font-medium mt-1">Gratuit, rapide et 100% sécurisé.</p>
-              </div>
-              <Button variant="outline" size="sm" className="rounded-xl font-bold gap-2 text-primary border-primary/20 hover:bg-primary/5">
-                <Sparkles className="h-4 w-4" /> IA Assist
-              </Button>
+            <div className="mb-10">
+              <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-primary">Vendre un article</h1>
+              <p className="text-muted-foreground font-medium mt-1">Gratuit, rapide et 100% sécurisé.</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-8">

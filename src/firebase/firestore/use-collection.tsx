@@ -29,6 +29,7 @@ export function useCollection(query: Query<DocumentData> | null) {
         setLoading(false);
       },
       async (serverError: FirestoreError) => {
+        console.error('Firestore server error in useCollection:', serverError);
         const permissionError = new FirestorePermissionError({
           path: (query as any)._query?.path?.toString() || 'unknown',
           operation: 'list',

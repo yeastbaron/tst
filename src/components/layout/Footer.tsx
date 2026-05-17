@@ -8,10 +8,12 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export function Footer() {
   const [year, setYear] = useState<number | null>(null);
+  const [mounted, setMounted] = useState(false);
   const logoUrl = PlaceHolderImages.find(img => img.id === 'logo')?.imageUrl;
 
   useEffect(() => {
     setYear(new Date().getFullYear());
+    setMounted(true);
   }, []);
 
   return (
@@ -21,7 +23,7 @@ export function Footer() {
           <div className="col-span-1 md:col-span-2 space-y-6">
             <Link href="/" className="inline-block">
               <div className="relative w-48 h-12">
-                {logoUrl && (
+                {mounted && logoUrl && (
                   <Image src={logoUrl} alt="Logo" fill className="object-contain" />
                 )}
               </div>

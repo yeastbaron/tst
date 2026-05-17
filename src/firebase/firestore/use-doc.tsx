@@ -29,6 +29,7 @@ export function useDoc(ref: DocumentReference<DocumentData> | null) {
         setLoading(false);
       },
       async (serverError: FirestoreError) => {
+        console.error('Firestore server error in useDoc:', serverError);
         const permissionError = new FirestorePermissionError({
           path: ref.path,
           operation: 'get',

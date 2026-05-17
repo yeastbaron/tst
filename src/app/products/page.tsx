@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -10,17 +9,28 @@ import { ProductCard } from '@/components/products/ProductCard';
 import { AdBanner } from '@/components/ads/AdBanner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, SlidersHorizontal, Sparkles, X, Loader2, PackageSearch } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Loader2, PackageSearch } from 'lucide-react';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, where, orderBy } from 'firebase/firestore';
 
 function ProductsContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get('category');
+  const initialSearch = searchParams.get('search') || '';
   const db = useFirestore();
   
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(initialCategory);
+
+  useEffect(() => {
+    const search = searchParams.get('search') || '';
+    setSearchQuery(search);
+  }, [searchParams]);
+
+  useEffect(() => {
+    const category = searchParams.get('category');
+    setSelectedCategory(category);
+  }, [searchParams]);
 
   const productsQuery = useMemoFirebase(() => {
     if (!db) return null;
@@ -42,7 +52,7 @@ function ProductsContent() {
     <main className="flex-1 bg-muted/10 pb-20">
       <section className="bg-white border-b py-4 md:py-8 sticky top-16 z-40">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto space-y-4">
+          <form onSubmit={(e) => e.preventDefault()} className="max-w-4xl mx-auto space-y-4">
             <div className="relative group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input 
@@ -53,12 +63,12 @@ function ProductsContent() {
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-2">
                 {searchQuery && (
-                   <Button variant="ghost" size="icon" onClick={() => setSearchQuery('')} className="h-10 w-10">
+                   <Button type="button" variant="ghost" size="icon" onClick={() => setSearchQuery('')} className="h-10 w-10">
                      <X className="h-4 w-4" />
                    </Button>
                 )}
-                <Button className="h-10 bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold rounded-xl">
-                  <Sparkles className="h-4 w-4 mr-2" /> Rechercher
+                <Button type="submit" className="h-10 bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold rounded-xl">
+                  Rechercher
                 </Button>
               </div>
             </div>
@@ -84,7 +94,7 @@ function ProductsContent() {
                 </Button>
               ))}
             </div>
-          </div>
+          </form>
         </div>
       </section>
 

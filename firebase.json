@@ -1,0 +1,30 @@
+{
+  "apphosting": {
+    "backendId": "sdvmarketplace-backend",
+    "ignore": [
+      "node_modules",
+      ".git",
+      ".agents",
+      ".idx",
+      "firebase-debug.log",
+      "firebase-debug.*.log",
+      "functions"
+    ]
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "nam5",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "auth": {
+    "providers": {
+      "anonymous": true,
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "sdvMarketPlace",
+        "supportEmail": "ndaw22@gmail.com"
+      }
+    }
+  }
+}

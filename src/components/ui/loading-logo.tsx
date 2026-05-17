@@ -2,15 +2,21 @@
 "use client";
 
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export function LoadingLogo() {
+  const [mounted, setMounted] = useState(false);
   const logo = PlaceHolderImages.find(img => img.id === 'logo')?.imageUrl;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center space-y-8">
       <div className="relative w-48 h-48 animate-pulse-logo">
-        {logo && (
+        {mounted && logo && (
           <Image 
             src={logo} 
             alt="Chargement SalleDeVente.sn" 
