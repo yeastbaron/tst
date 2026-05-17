@@ -1,7 +1,7 @@
 
 /**
  * Firebase configuration for SalleDeVente.sn
- * SYNC_ID: deploy-force-v10-public-access
+ * SYNC_ID: deploy-step-by-step-v1
  */
 export const firebaseConfig = {
   apiKey: "AIzaSyBqF9OUEd6-ldEa8oNUKAYev1CWelI-flU",

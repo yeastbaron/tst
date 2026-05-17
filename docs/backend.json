@@ -10,9 +10,9 @@
         "description": { "type": "string", "description": "Description détaillée" },
         "basePrice": { "type": "number", "description": "Prix de base" },
         "category": { "type": "string", "description": "ID de la catégorie" },
-        "condition": { "type": "string", "enum": ["new", "used", "refurbished"] },
+        "condition": { "type": "string", "description": "État de l'article" },
         "images": { "type": "array", "items": { "type": "string" } },
-        "status": { "type": "string", "enum": ["active", "pending", "rejected", "sold"] },
+        "status": { "type": "string", "description": "Statut (active, pending, etc.)" },
         "createdAt": { "type": "object" },
         "sellerId": { "type": "string" }
       },
@@ -25,7 +25,7 @@
   "firestore": {
     "/products/{productId}": {
       "schema": "Product",
-      "description": "ACCÈS PUBLIC TOTAL : N'importe qui peut lire, lister et créer. allow read, list, create: if true;"
+      "description": "PUBLIC ACCESS: Anyone can read, list, and create. allow read, list, create: if true;"
     }
   }
 }

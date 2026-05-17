@@ -55,7 +55,7 @@ export const CATEGORIES = [
   }
 ];
 
-// Mock products are removed to ensure only Firestore data is displayed
+// Les articles fictifs sont supprimés pour ne montrer que la base de données réelle
 export const MOCK_PRODUCTS = [];
 
 export function calculatePriceWithCommission(basePrice: number): number {
