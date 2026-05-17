@@ -5,19 +5,19 @@ import { getAuth, Auth } from 'firebase/auth';
 import { firebaseConfig } from './config';
 
 /**
- * Initializes Firebase services with robust error handling and explicit database reference.
+ * Initialisation sécurisée de Firebase pour éviter les blocages au démarrage.
  */
 export function initializeFirebase() {
   try {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     
-    // Explicitly target the (default) database instance to ensure rules are correctly applied.
+    // On force l'utilisation de l'instance Firestore par défaut.
     const db = getFirestore(app);
     const auth = getAuth(app);
     
     return { app, db, auth };
   } catch (error) {
-    console.error("Critical Firebase Initialization Error:", error);
+    console.warn("Firebase n'a pas pu être initialisé correctement, l'application fonctionnera en mode limité.");
     return { 
       app: null as unknown as FirebaseApp, 
       db: null as unknown as Firestore, 

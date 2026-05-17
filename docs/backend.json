@@ -3,13 +3,13 @@
   "entities": {
     "Product": {
       "title": "Product",
-      "description": "An item listed for sale on the marketplace.",
+      "description": "Un article mis en vente sur SalleDeVente.sn.",
       "type": "object",
       "properties": {
-        "title": { "type": "string", "description": "The title of the product" },
-        "description": { "type": "string", "description": "Full description of the item" },
-        "basePrice": { "type": "number", "description": "Price before commission" },
-        "category": { "type": "string", "description": "Product category ID" },
+        "title": { "type": "string", "description": "Le titre du produit" },
+        "description": { "type": "string", "description": "Description détaillée" },
+        "basePrice": { "type": "number", "description": "Prix de base" },
+        "category": { "type": "string", "description": "ID de la catégorie" },
         "condition": { "type": "string", "enum": ["new", "used", "refurbished"] },
         "images": { "type": "array", "items": { "type": "string" } },
         "status": { "type": "string", "enum": ["active", "pending", "rejected", "sold"] },
@@ -25,7 +25,7 @@
   "firestore": {
     "/products/{productId}": {
       "schema": "Product",
-      "description": "PUBLIC ACCESS: Anyone can read, list, and create documents in this collection. allow read: if true; allow create: if true;"
+      "description": "ACCÈS PUBLIC TOTAL : N'importe qui peut lire, lister et créer. allow read, list, create: if true;"
     }
   }
 }
