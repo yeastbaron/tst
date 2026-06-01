@@ -107,7 +107,7 @@ export default function AuctionClient() {
         <main className="flex-1 flex flex-col items-center justify-center space-y-4 p-8">
           <AlertTriangle className="h-12 w-12 text-red-500 animate-bounce" />
           <h1 className="text-2xl font-black uppercase">Oups ! Enchère introuvable.</h1>
-          <Button asChild className="rounded-xl bg-indigo-650 hover:bg-indigo-700 text-white"><Link href="/encheres">Retour aux enchères</Link></Button>
+          <Button asChild className="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white"><Link href="/encheres">Retour aux enchères</Link></Button>
         </main>
         <Footer />
       </div>
@@ -368,7 +368,7 @@ export default function AuctionClient() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-indigo-500/5 border border-indigo-500/10 p-4 rounded-xl space-y-0.5">
                       <span className="text-[9px] font-black uppercase tracking-wider text-indigo-700 block">Offre Actuelle</span>
-                      <span className="text-xl md:text-2xl font-black text-indigo-650">{currentPrice.toLocaleString('fr-FR')}</span>
+                      <span className="text-xl md:text-2xl font-black text-indigo-600">{currentPrice.toLocaleString('fr-FR')}</span>
                       <span className="text-xs font-bold text-indigo-600 ml-1">FCFA</span>
                     </div>
                     
@@ -430,7 +430,7 @@ export default function AuctionClient() {
                       {!user ? (
                         <div className="text-center p-4 bg-slate-50 border rounded-xl space-y-3">
                           <p className="text-xs font-bold text-slate-600">Vous devez être connecté et disposer d'un compte validé pour miser.</p>
-                          <Button asChild className="w-full bg-indigo-650 hover:bg-indigo-700 rounded-xl font-bold h-10">
+                          <Button asChild className="w-full bg-indigo-600 hover:bg-indigo-700 rounded-xl font-bold h-10">
                             <Link href="/login">Se connecter</Link>
                           </Button>
                         </div>
@@ -564,11 +564,11 @@ export default function AuctionClient() {
               {/* Badges de confiance */}
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div className="flex flex-col items-center gap-1.5 bg-white p-4 rounded-2xl border">
-                  <ShieldCheck className="h-6 w-6 text-indigo-650" />
+                  <ShieldCheck className="h-6 w-6 text-indigo-600" />
                   <p className="font-bold text-xs uppercase text-slate-700 leading-none">Transactions Sécurisées</p>
                 </div>
                 <div className="flex flex-col items-center gap-1.5 bg-white p-4 rounded-2xl border">
-                  <TrendingUp className="h-6 w-6 text-indigo-650" />
+                  <TrendingUp className="h-6 w-6 text-indigo-600" />
                   <p className="font-bold text-xs uppercase text-slate-700 leading-none">Offres en direct</p>
                 </div>
               </div>
@@ -600,7 +600,7 @@ export default function AuctionClient() {
 
             <Button 
               onClick={() => setShowSuccessModal(false)}
-              className="w-full bg-indigo-650 hover:bg-indigo-700 text-white font-bold h-12 rounded-xl"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-12 rounded-xl"
             >
               Fermer
             </Button>

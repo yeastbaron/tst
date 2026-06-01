@@ -115,10 +115,10 @@ export function ProductCard({ product }: ProductCardProps) {
           {product.isAuction ? (
             <div className="flex flex-col w-full">
               <div className="flex items-baseline gap-0.5 md:gap-1">
-                <span className="text-sm md:text-lg font-black text-indigo-650">
+                <span className="text-sm md:text-lg font-black text-indigo-600">
                   {(product.currentBid || product.basePrice).toLocaleString('fr-FR')}
                 </span>
-                <span className="text-[8px] md:text-[10px] font-bold text-indigo-650">FCFA</span>
+                <span className="text-[8px] md:text-[10px] font-bold text-indigo-600">FCFA</span>
                 <span className="text-[8.5px] font-black text-indigo-600 bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-200 uppercase ml-1.5">
                   Offre
                 </span>

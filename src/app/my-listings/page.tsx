@@ -287,7 +287,7 @@ export default function MyListingsPage() {
                           </h3>
                           {item.isAuction ? (
                             <div className="flex flex-col gap-0.5">
-                              <p className="text-lg md:text-xl font-black text-indigo-650">
+                              <p className="text-lg md:text-xl font-black text-indigo-600">
                                 {(item.currentBid || item.basePrice).toLocaleString('fr-FR')} FCFA
                               </p>
                               <p className="text-[10px] font-bold text-muted-foreground uppercase">

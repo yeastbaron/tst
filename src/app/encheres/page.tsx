@@ -60,7 +60,7 @@ export default function AuctionsPage() {
       <Header />
       
       {/* Banner En-tête */}
-      <section className="bg-gradient-to-r from-indigo-900 via-indigo-850 to-slate-900 text-white py-12 md:py-16 relative overflow-hidden">
+      <section className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-slate-900 text-white py-12 md:py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(99,102,241,0.15),transparent)] pointer-events-none" />
         <div className="container mx-auto px-4 max-w-7xl relative z-10">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">

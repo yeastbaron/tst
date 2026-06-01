@@ -228,17 +228,17 @@ export default function Home() {
             <div className="w-full bg-gradient-to-r from-indigo-50 via-white to-indigo-50 border-y border-indigo-200 py-4 shadow-sm">
               <div className="container mx-auto px-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-indigo-650 flex items-center justify-center text-white shadow-sm">
+                  <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-sm">
                     <span className="text-sm">🔨</span>
                   </div>
                   <div>
-                    <h2 className="text-sm font-black uppercase tracking-widest text-indigo-750">Enchères en cours</h2>
+                    <h2 className="text-sm font-black uppercase tracking-widest text-indigo-700">Enchères en cours</h2>
                     <p className="text-[9px] font-bold text-indigo-500 uppercase tracking-widest leading-none mt-0.5">Faites vos offres en direct</p>
                   </div>
                 </div>
                 <Link 
                   href="/encheres" 
-                  className="text-[10px] font-black uppercase tracking-widest text-indigo-650 hover:text-indigo-850 hover:underline transition-all"
+                  className="text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:text-indigo-800 hover:underline transition-all"
                 >
                   Voir tout
                 </Link>
