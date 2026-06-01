@@ -104,7 +104,7 @@ export default function Home() {
       .slice(0, 6);
   }, [products]);
 
-  // Les enchères actives (non terminées) pour l'affichage en vitrine
+  // Les enchères actives (non terminées) pour l'affichage en vitrine (triées par nombre d'offres reçues)
   const activeAuctions = useMemo(() => {
     if (!products) return [];
     return products
@@ -117,6 +117,7 @@ export default function Home() {
         ) < new Date();
         return !isExpired;
       })
+      .sort((a, b) => (b.bidsCount || 0) - (a.bidsCount || 0))
       .slice(0, 6);
   }, [products]);
 
@@ -245,26 +246,24 @@ export default function Home() {
             </div>
 
             <div className="container mx-auto px-4 py-8">
-              <div className={cn(
-                "grid gap-3 md:gap-4",
-                productCols === 2 ? "grid-cols-2 md:grid-cols-4" : "grid-cols-3 md:grid-cols-5",
-                "lg:grid-cols-6"
-              )}>
-                {activeAuctions.map((p) => (
-                  <ProductCard key={p.id} product={{
-                    id: p.id,
-                    title: p.title,
-                    basePrice: p.basePrice,
-                    image: p.images?.[0] || 'https://picsum.photos/seed/placeholder/400/400',
-                    condition: p.condition as any,
-                    category: CATEGORIES.find(c => c.id === p.category)?.name || p.category,
-                    subcategory: p.subcategory,
-                    isPro: p.isPro,
-                    isAuction: true,
-                    currentBid: p.currentBid,
-                    bidsCount: p.bidsCount,
-                    auctionEndAt: p.auctionEndAt
-                  }} />
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4">
+                {activeAuctions.map((p, idx) => (
+                  <div key={p.id} className={cn(idx >= 4 ? "hidden sm:block" : "")}>
+                    <ProductCard product={{
+                      id: p.id,
+                      title: p.title,
+                      basePrice: p.basePrice,
+                      image: p.images?.[0] || 'https://picsum.photos/seed/placeholder/400/400',
+                      condition: p.condition as any,
+                      category: CATEGORIES.find(c => c.id === p.category)?.name || p.category,
+                      subcategory: p.subcategory,
+                      isPro: p.isPro,
+                      isAuction: true,
+                      currentBid: p.currentBid,
+                      bidsCount: p.bidsCount,
+                      auctionEndAt: p.auctionEndAt
+                    }} />
+                  </div>
                 ))}
               </div>
             </div>
