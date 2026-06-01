@@ -64,7 +64,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Téléphone</p>
-                      <p className="font-bold">+221 33 800 00 00</p>
+                      <a href="tel:+221761740641" className="font-bold hover:text-primary transition-colors">+221 76 174 06 41</a>
                     </div>
                   </CardContent>
                 </Card>

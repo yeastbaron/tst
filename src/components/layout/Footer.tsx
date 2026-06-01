@@ -47,7 +47,7 @@ export function Footer() {
               <p>
                 Propriété exclusive de <strong>Ogo&apos;o SARL</strong><br />
                 Dakar, BP 25000, Sénégal<br />
-                RC : SN-DKR-2024-B-XXXX
+                RC : SN.DKR.2019.B.36376
               </p>
               <Link href="/terms" className="inline-block text-primary font-bold hover:underline">Conditions Générales d&apos;Utilisation</Link>
             </div>

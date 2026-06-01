@@ -9,6 +9,8 @@ import { ProductCard } from '@/components/products/ProductCard';
 import { AdBanner } from '@/components/ads/AdBanner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { Search, SlidersHorizontal, X, Loader2, PackageSearch } from 'lucide-react';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, where, orderBy } from 'firebase/firestore';
@@ -16,11 +18,14 @@ import { collection, query, where, orderBy } from 'firebase/firestore';
 function ProductsContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get('category');
+  const initialSubcategory = searchParams.get('subcategory');
   const initialSearch = searchParams.get('search') || '';
   const db = useFirestore();
   
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(initialCategory);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(initialSubcategory);
+  const [wholesaleOnlyFilter, setWholesaleOnlyFilter] = useState(false);
 
   useEffect(() => {
     const search = searchParams.get('search') || '';
@@ -32,19 +37,43 @@ function ProductsContent() {
     setSelectedCategory(category);
   }, [searchParams]);
 
+  useEffect(() => {
+    const subcategory = searchParams.get('subcategory');
+    setSelectedSubcategory(subcategory);
+  }, [searchParams]);
+
   const productsQuery = useMemoFirebase(() => {
     if (!db) return null;
-    let q = query(collection(db, 'products'), where('status', '==', 'active'), orderBy('createdAt', 'desc'));
     if (selectedCategory) {
-      q = query(collection(db, 'products'), where('status', '==', 'active'), where('category', '==', selectedCategory), orderBy('createdAt', 'desc'));
+      if (selectedSubcategory) {
+        return query(
+          collection(db, 'products'),
+          where('status', '==', 'active'),
+          where('category', '==', selectedCategory),
+          where('subcategory', '==', selectedSubcategory),
+          orderBy('createdAt', 'desc')
+        );
+      }
+      return query(
+        collection(db, 'products'),
+        where('status', '==', 'active'),
+        where('category', '==', selectedCategory),
+        orderBy('createdAt', 'desc')
+      );
     }
-    return q;
-  }, [db, selectedCategory]);
+    return query(
+      collection(db, 'products'),
+      where('status', '==', 'active'),
+      orderBy('createdAt', 'desc')
+    );
+  }, [db, selectedCategory, selectedSubcategory]);
 
   const { data: allProducts, loading } = useCollection(productsQuery);
 
   const filteredProducts = allProducts?.filter((p) => {
+    if (p.isAuction) return false;
     if (searchQuery && !p.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (wholesaleOnlyFilter && !p.allowWholesale) return false;
     return true;
   }) || [];
 
@@ -73,11 +102,28 @@ function ProductsContent() {
               </div>
             </div>
 
+            <div className="flex items-center gap-2 pt-1">
+              <div className="flex items-center gap-2 bg-purple-500/5 border border-purple-500/20 px-3.5 py-1.5 rounded-xl shadow-sm">
+                <Label htmlFor="wholesale-filter" className="text-xs font-black uppercase text-purple-700 cursor-pointer">
+                  📦 Vente en gros uniquement
+                </Label>
+                <Switch 
+                  id="wholesale-filter"
+                  checked={wholesaleOnlyFilter}
+                  onCheckedChange={setWholesaleOnlyFilter}
+                  className="data-[state=checked]:bg-purple-600"
+                />
+              </div>
+            </div>
+
             <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
               <Button 
                 variant={selectedCategory === null ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setSelectedCategory(null)}
+                onClick={() => {
+                  setSelectedCategory(null);
+                  setSelectedSubcategory(null);
+                }}
                 className="rounded-full font-bold px-5"
               >
                 Tout
@@ -87,13 +133,42 @@ function ProductsContent() {
                   key={cat.id}
                   variant={selectedCategory === cat.id ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setSelectedCategory(cat.id)}
+                  onClick={() => {
+                    setSelectedCategory(cat.id);
+                    setSelectedSubcategory(null);
+                  }}
                   className="rounded-full font-bold px-5 whitespace-nowrap"
                 >
                   {cat.name}
                 </Button>
               ))}
             </div>
+
+            {selectedCategory && (
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-t pt-3 mt-2 scrollbar-hide animate-in slide-in-from-top-1 duration-200">
+                <Button 
+                  type="button"
+                  variant={selectedSubcategory === null ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setSelectedSubcategory(null)}
+                  className="rounded-full text-xs font-bold px-4"
+                >
+                  Toutes les sous-catégories
+                </Button>
+                {CATEGORIES.find(c => c.id === selectedCategory)?.subcategories.map(sub => (
+                  <Button 
+                    key={sub}
+                    type="button"
+                    variant={selectedSubcategory === sub ? 'secondary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setSelectedSubcategory(sub)}
+                    className="rounded-full text-xs font-medium px-4 whitespace-nowrap"
+                  >
+                    {sub}
+                  </Button>
+                ))}
+              </div>
+            )}
           </form>
         </div>
       </section>
@@ -125,22 +200,30 @@ function ProductsContent() {
             </div>
           ) : filteredProducts.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-              {filteredProducts.map((p) => (
-                <ProductCard key={p.id} product={{
-                  id: p.id,
-                  title: p.title,
-                  basePrice: p.basePrice,
-                  image: p.images?.[0] || 'https://picsum.photos/seed/placeholder/400/400',
-                  condition: p.condition as any,
-                  category: CATEGORIES.find(c => c.id === p.category)?.name || p.category
-                }} />
-              ))}
+              {[...filteredProducts]
+                .sort((a, b) => (b.isPro ? 1 : 0) - (a.isPro ? 1 : 0))
+                .map((p) => (
+                  <ProductCard key={p.id} product={{
+                    id: p.id,
+                    title: p.title,
+                    basePrice: p.basePrice,
+                    image: p.images?.[0] || 'https://picsum.photos/seed/placeholder/400/400',
+                    condition: p.condition as any,
+                    category: CATEGORIES.find(c => c.id === p.category)?.name || p.category,
+                    subcategory: p.subcategory,
+                    isPro: p.isPro,
+                    allowWholesale: p.allowWholesale,
+                    wholesaleOnly: p.wholesaleOnly,
+                    minWholesaleQuantity: p.minWholesaleQuantity,
+                    wholesalePrice: p.wholesalePrice
+                  }} />
+                ))}
             </div>
           ) : (
             <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-muted-foreground/30 flex flex-col items-center gap-4">
               <PackageSearch className="h-12 w-12 text-muted-foreground opacity-10" />
               <p className="text-xl font-bold text-muted-foreground">Aucun article trouvé.</p>
-              <Button variant="link" className="text-primary font-bold mt-2" onClick={() => {setSearchQuery(''); setSelectedCategory(null);}}>
+              <Button variant="link" className="text-primary font-bold mt-2" onClick={() => {setSearchQuery(''); setSelectedCategory(null); setSelectedSubcategory(null); setWholesaleOnlyFilter(false);}}>
                 Réinitialiser les filtres
               </Button>
             </div>

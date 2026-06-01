@@ -1,18 +1,156 @@
-rules_version='2'
+rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.time < timestamp.date(2026, 6, 16);
+    
+    // Vérifie si l'utilisateur connecté est le Super Admin (avec garde-fou contre le type null)
+    function isAdmin() {
+      return request.auth != null && 
+             request.auth.token != null && 
+             request.auth.token.email == 'ndaw22@gmail.com';
+    }
+
+    // Vérifie si l'utilisateur est authentifié
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // Vérifie si l'utilisateur est banni (avec garde-fou contre le type null)
+    function isBanned() {
+      return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('isBanned', false) == true;
+    }
+
+    // RÈGLES DE LA COLLECTION "USERS"
+    match /users/{userId} {
+      // Les membres et visiteurs non bannis peuvent lire les profils pour contacter les vendeurs
+      allow read: if request.auth == null || 
+                     !exists(/databases/$(database)/documents/users/$(request.auth.uid)) ||
+                     get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('isBanned', false) == false;
+      
+      // Un membre peut créer son propre document lors de sa première connexion
+      allow create: if isAuth() && request.auth.uid == userId;
+      
+      // Un membre peut modifier ses coordonnées de profil (sauf s'il est banni). L'admin a les pleins pouvoirs (bannissement/PRO).
+      allow update: if isAdmin() || (
+        isAuth() && 
+        request.auth.uid == userId && 
+        !isBanned() && 
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isBanned', 'isSuperSeller', 'superSellerExpiresAt']) &&
+        (request.resource.data.get('type', 'particulier') == 'particulier' || request.resource.data.get('type', 'particulier') == resource.data.get('type', 'particulier')) &&
+        (request.resource.data.get('proStatus', null) == null || request.resource.data.get('proStatus', null) == 'pending' || request.resource.data.get('proStatus', null) == resource.data.get('proStatus', null))
+      );
+      
+      // Seul l'admin peut supprimer un utilisateur
+      allow delete: if isAdmin();
+    }
+
+    // RÈGLES DE LA COLLECTION "PRODUCTS"
+    match /products/{productId} {
+      // Tout le monde peut voir les produits actifs. L'admin ou le propriétaire peuvent voir les produits en cours de validation ou rejetés.
+      allow read: if resource == null || 
+                     resource.data.status == 'active' || 
+                     resource.data.status == 'sold' ||
+                     (request.auth != null && (request.auth.token.email == 'ndaw22@gmail.com' || resource.data.sellerId == request.auth.uid));
+      
+      // Les membres connectés et non-bannis peuvent soumettre un nouvel article (approbation automatique ou pending)
+      allow create: if isAuth() && 
+                      !isBanned() && 
+                      request.resource.data.sellerId == request.auth.uid && 
+                      (request.resource.data.status == 'active' || request.resource.data.status == 'pending') &&
+                      (!('isPro' in request.resource.data) || 
+                       request.resource.data.isPro == false || 
+                       (request.resource.data.isPro == true && 
+                        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('type', '') == 'professionnel' &&
+                        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('proExpiresAt', null) == null || 
+                         timestamp.value(get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('proExpiresAt', '2099-01-01T00:00:00Z')) > request.time))) &&
+                      (!('sellerIsSuper' in request.resource.data) || 
+                       request.resource.data.sellerIsSuper == false || 
+                       (request.resource.data.sellerIsSuper == true && 
+                        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('isSuperSeller', false) == true &&
+                        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('superSellerExpiresAt', null) == null || 
+                         timestamp.value(get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('superSellerExpiresAt', '2099-01-01T00:00:00Z')) > request.time)));
+      
+      // L'admin peut modifier n'importe quel produit. 
+      // Le propriétaire non-banni peut modifier son propre produit (changement de titre, prix, description, ou passage à vendu).
+      // N'importe quel membre connecté et non-banni peut signaler un produit (met à jour uniquement le compteur reportsCount).
+      allow update: if (request.auth != null && (
+                      request.auth.token.email == 'ndaw22@gmail.com' || 
+                      (resource.data.sellerId == request.auth.uid && 
+                       !isBanned() && 
+                       (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['isPro', 'sellerIsSuper']) || 
+                        (request.resource.data.isPro == resource.data.isPro && request.resource.data.sellerIsSuper == resource.data.sellerIsSuper))) ||
+                      (!isBanned() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reportsCount'])) ||
+                      // Règles d'enchères sécurisées
+                      (!isBanned() &&
+                       resource.data.get('isAuction', false) == true &&
+                       resource.data.status == 'active' &&
+                       resource.data.sellerId != request.auth.uid &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['currentBid', 'currentBidderId', 'currentBidderName', 'bidsCount']) &&
+                       request.resource.data.currentBidderId == request.auth.uid &&
+                       request.resource.data.currentBid > resource.data.get('currentBid', resource.data.basePrice) &&
+                       request.resource.data.bidsCount == resource.data.get('bidsCount', 0) + 1
+                      )
+                    )) ||
+                    (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewsCount', 'phoneClicksCount']));
+      
+      // Le propriétaire ou l'admin peut supprimer un produit
+      allow delete: if isAdmin() || (isAuth() && resource.data.sellerId == request.auth.uid);
+    }
+
+    // RÈGLES DE LA COLLECTION "REPORTS"
+    match /reports/{reportId} {
+      // Seul l'admin peut lire les rapports
+      allow read: if isAdmin();
+      
+      // Les membres connectés et non-bannis peuvent créer un rapport
+      allow create: if isAuth() && !isBanned() && request.resource.data.reporterId == request.auth.uid;
+      
+      // Personne ne peut modifier ou supprimer un rapport à part l'admin
+      allow update, delete: if isAdmin();
+    }
+
+    // RÈGLES DE LA COLLECTION DE NOTIFICATIONS (sous-collection de users)
+    match /users/{userId}/notifications/{notificationId} {
+      allow read, update, delete: if isAdmin() || (isAuth() && request.auth.uid == userId);
+      allow create: if isAdmin() || 
+                    (isAuth() && request.auth.uid == userId) || 
+                    (isAuth() && get(/databases/$(database)/documents/users/$(userId)).data.email == 'ndaw22@gmail.com');
+    }
+
+    // RÈGLES DE LA COLLECTION "GLOBAL_NOTIFICATIONS" (notifications globales et commerciales)
+    match /global_notifications/{notificationId} {
+      allow read: if isAuth();
+      allow write, update, delete: if isAdmin();
+    }
+
+    // RÈGLES DE LA COLLECTION "ONLINE_USERS" (utilisateurs actuellement en ligne)
+    match /online_users/{sessionId} {
+      allow read: if isAdmin();
+      allow write: if isAuth() || request.auth == null;
+    }
+
+    // RÈGLES DE LA COLLECTION "ANALYTICS_SESSIONS" (sessions d'utilisateurs)
+    match /analytics_sessions/{sessionId} {
+      allow read: if isAdmin();
+      allow write: if isAuth() || request.auth == null;
+    }
+
+    // RÈGLES DE LA COLLECTION "ANALYTICS_PAGE_VIEWS" (vues de pages)
+    match /analytics_page_views/{viewId} {
+      allow read: if isAdmin();
+      allow create: if isAuth() || request.auth == null;
+      allow update, delete: if isAdmin();
+    }
+
+    // RÈGLES DE LA COLLECTION "TRANSACTIONS" (paiements en ligne)
+    match /transactions/{transactionId} {
+      allow read: if isAdmin() || (isAuth() && resource.data.userId == request.auth.uid);
+      allow create: if isAuth() && 
+                    request.resource.data.userId == request.auth.uid && 
+                    request.resource.data.status == 'pending';
+      allow update, delete: if isAdmin();
     }
   }
 }

@@ -9,15 +9,23 @@ import { LoadingLogo } from '@/components/ui/loading-logo';
 
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const [services, setServices] = useState<ReturnType<typeof initializeFirebase> | null>(null);
+  const [showLoader, setShowLoader] = useState(true);
 
   useEffect(() => {
     setServices(initializeFirebase());
+    
+    // Assurer un affichage doux d'au moins 800ms pour une transition de logo premium et fluide
+    const timer = setTimeout(() => {
+      setShowLoader(false);
+    }, 800);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  // Afficher le loader pendant l'initialisation de Firebase
-  if (!services) {
+  // Afficher le loader pendant l'initialisation de Firebase et du chargement visuel
+  if (showLoader || !services) {
     return (
-      <div className="h-screen w-full flex items-center justify-center bg-background">
+      <div className="h-screen w-full flex items-center justify-center bg-background animate-in fade-in duration-300">
         <LoadingLogo />
       </div>
     );

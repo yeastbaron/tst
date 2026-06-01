@@ -6,16 +6,18 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 interface AdBannerProps {
   className?: string;
   id?: string;
+  imageUrl?: string;
 }
 
-export function AdBanner({ className = "", id = "ad-banner" }: AdBannerProps) {
+export function AdBanner({ className = "", id = "ad-banner", imageUrl }: AdBannerProps) {
   const ad = PlaceHolderImages.find(img => img.id === id) || PlaceHolderImages[0];
+  const src = imageUrl || ad.imageUrl;
 
   return (
     <div className={`w-full overflow-hidden rounded-xl border bg-muted/30 group cursor-pointer hover:border-primary/30 transition-colors ${className}`}>
       <div className="relative w-full h-[80px] sm:h-[100px] md:h-[120px]">
         <Image
-          src={ad.imageUrl}
+          src={src}
           alt="Espace Publicitaire"
           fill
           className="object-cover transition-transform group-hover:scale-[1.01]"

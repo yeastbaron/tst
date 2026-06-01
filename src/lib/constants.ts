@@ -1,61 +1,105 @@
-
 import { PlaceHolderImages } from './placeholder-images';
 
-export const COMMISSION_RATE = 0.10;
+export const COMMISSION_RATE = 0.00;
 
 export const CATEGORIES = [
   {
     id: 'electronics',
-    name: 'Électronique',
+    name: 'Électronique & Multimédia',
     icon: 'Smartphone',
-    image: PlaceHolderImages.find(img => img.id === 'electronics')?.imageUrl,
-    subcategories: ['Téléphones', 'Ordinateurs', 'Tablettes', 'Téléviseurs', 'Audio', 'Accessoires']
+    image: 'https://picsum.photos/seed/elec1/800/600',
+    subcategories: [
+      'Téléphonie & Tablettes', 
+      'Informatique & Bureau', 
+      'Image & Son', 
+      'Consoles & Jeux vidéo'
+    ]
   },
   {
     id: 'fashion',
-    name: 'Mode',
+    name: 'Mode, Beauté & Accessoires',
     icon: 'Shirt',
-    image: PlaceHolderImages.find(img => img.id === 'fashion')?.imageUrl,
-    subcategories: ['Vêtements Homme', 'Vêtements Femme', 'Enfants', 'Chaussures', 'Sacs', 'Montres']
+    image: 'https://picsum.photos/seed/fash1/800/600',
+    subcategories: [
+      'Vêtements', 
+      'Chaussures', 
+      'Accessoires de mode', 
+      'Bijoux & Montres', 
+      'Beauté & Cosmétiques'
+    ]
   },
   {
     id: 'home',
-    name: 'Maison',
+    name: 'Maison, Déco & Jardin',
     icon: 'Home',
-    image: PlaceHolderImages.find(img => img.id === 'home')?.imageUrl,
-    subcategories: ['Meubles', 'Électroménager', 'Décoration', 'Linge de maison', 'Cuisine']
+    image: 'https://picsum.photos/seed/furn1/800/600',
+    subcategories: [
+      'Ameublement', 
+      'Déco & Luminaire', 
+      'Électroménager', 
+      'Linge de maison', 
+      'Jardin & Extérieur', 
+      'Bricolage & Quincaillerie'
+    ]
   },
   {
     id: 'vehicles',
-    name: 'Véhicules',
+    name: 'Véhicules, Auto & Moto',
     icon: 'Car',
-    image: PlaceHolderImages.find(img => img.id === 'cars')?.imageUrl,
-    subcategories: ['Voitures', 'Motos', 'Pièces Détachées', 'Vélos']
+    image: 'https://picsum.photos/seed/car1/800/600',
+    subcategories: [
+      'Véhicules (Vente/Location)', 
+      'Pièces & Accessoires Auto/Moto', 
+      'Entretien & Outillage'
+    ]
   },
   {
-    id: 'beauty',
-    name: 'Beauté & Santé',
-    icon: 'Sparkles',
-    image: PlaceHolderImages.find(img => img.id === 'beauty')?.imageUrl,
-    subcategories: ['Maquillage', 'Soins Cheveux', 'Parfums', 'Hygiène']
-  },
-  {
-    id: 'sports',
-    name: 'Sports & Loisirs',
+    id: 'loisirs',
+    name: 'Loisirs, Culture & Divertissement',
     icon: 'Dumbbell',
-    image: PlaceHolderImages.find(img => img.id === 'sports')?.imageUrl,
-    subcategories: ['Fitness', 'Jeux Vidéo', 'Jouets', 'Instruments de Musique']
+    image: 'https://picsum.photos/seed/sports1/800/600',
+    subcategories: [
+      'Livres & Revues', 
+      'Musique & Films', 
+      'Sports & Outdoor', 
+      'Jeux & Jouets', 
+      'Art & Collections'
+    ]
+  },
+  {
+    id: 'baby',
+    name: 'Bébé & Puériculture',
+    icon: 'Baby',
+    image: 'https://picsum.photos/seed/baby1/800/600',
+    subcategories: [
+      'Équipement de voyage', 
+      'Chambre & Sommeil', 
+      'Repas & Hygiène'
+    ]
+  },
+  {
+    id: 'grocery',
+    name: 'Épicerie & Produits Locaux',
+    icon: 'Apple',
+    image: 'https://picsum.photos/seed/grocery1/800/600',
+    subcategories: [
+      'Épicerie fine & Sèche', 
+      'Boissons'
+    ]
   },
   {
     id: 'pro',
-    name: 'Matériel Pro',
+    name: 'Services & Professionnels',
     icon: 'Briefcase',
-    image: PlaceHolderImages.find(img => img.id === 'pro')?.imageUrl,
-    subcategories: ['Outillage', 'Fournitures de Bureau', 'Agriculture']
+    image: 'https://picsum.photos/seed/pro1/800/600',
+    subcategories: [
+      'Fournitures de bureau', 
+      'Matériel professionnel & Industriel', 
+      'Services'
+    ]
   }
 ];
 
-// Les articles fictifs sont supprimés pour ne montrer que la base de données réelle
 export const MOCK_PRODUCTS = [];
 
 export function calculatePriceWithCommission(basePrice: number): number {

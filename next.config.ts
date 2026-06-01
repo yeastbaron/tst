@@ -37,6 +37,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  rewrites: async () => {
+    return [
+      {
+        source: '/__/:path*',
+        destination: 'https://sdvmarketplace.firebaseapp.com/__/:path*',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

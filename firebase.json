@@ -1,6 +1,7 @@
 {
   "apphosting": {
     "backendId": "sdvmarketplace-backend",
+    "rootDir": ".",
     "ignore": [
       "node_modules",
       ".git",
@@ -9,7 +10,8 @@
       "firebase-debug.log",
       "firebase-debug.*.log",
       "functions"
-    ]
+    ],
+    "alwaysDeployFromSource": true
   },
   "firestore": {
     "database": "(default)",

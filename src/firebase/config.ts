@@ -5,7 +5,7 @@
  */
 export const firebaseConfig = {
   apiKey: "AIzaSyBmX3J9lBRqlUeTQumQBkmdIz4lGYGHfN4",
-  authDomain: "sdvmarketplace.firebaseapp.com",
+  authDomain: "salledevente.sn",
   projectId: "sdvmarketplace",
   storageBucket: "sdvmarketplace.firebasestorage.app",
   messagingSenderId: "286699966379",
