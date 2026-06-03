@@ -38,6 +38,7 @@ export default function ProfilePage() {
   // Nouvel état pour la demande de badge Super-Vendeur
   const [selectedBadgeDays, setSelectedBadgeDays] = useState<number | null>(7);
   const [isRequestingBadge, setIsRequestingBadge] = useState(false);
+  const [proDurationMonths, setProDurationMonths] = useState<number>(1);
 
   // États pour la boutique
   const [shopName, setShopName] = useState('');
@@ -46,85 +47,7 @@ export default function ProfilePage() {
   const [shopCover, setShopCover] = useState('');
   const [isSavingShop, setIsSavingShop] = useState(false);
 
-  // Paiement PayTech
-  const [isPaying, setIsPaying] = useState(false);
 
-  // Gérer le retour de paiement
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const status = params.get('payment_status');
-      if (status === 'success') {
-        toast({
-          title: "Paiement en cours de traitement ! 🎉",
-          description: "Votre transaction a été validée. Les modifications seront effectives sous quelques secondes.",
-        });
-        router.replace('/profile');
-      } else if (status === 'cancel') {
-        toast({
-          title: "Paiement annulé ⚠️",
-          description: "Vous avez annulé la transaction.",
-          variant: "destructive"
-        });
-        router.replace('/profile');
-      }
-    }
-  }, [router, toast]);
-
-  const handlePayOnline = async (paymentType: 'pro' | 'super_seller', durationDays?: number) => {
-    if (!db || !user) return;
-    setIsPaying(true);
-    try {
-      const refCommand = `txn_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-      
-      let price = 100;
-      if (paymentType === 'super_seller') {
-        if (durationDays === 3) price = 10000;
-        else if (durationDays === 7) price = 20000;
-        else if (durationDays === 30) price = 50000;
-      }
-
-      await setDoc(doc(db, 'transactions', refCommand), {
-        transactionId: refCommand,
-        status: 'pending',
-        userId: user.uid,
-        type: paymentType,
-        amount: price,
-        durationDays: durationDays || null,
-        createdAt: new Date().toISOString()
-      });
-
-      const response = await fetch('/api/paytech/pay', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          type: paymentType,
-          durationDays,
-          userId: user.uid,
-          refCommand
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success && data.redirect_url) {
-        window.location.href = data.redirect_url;
-      } else {
-        throw new Error(data.message || "Erreur d'initialisation PayTech.");
-      }
-    } catch (err: any) {
-      console.error("Payment initiation failed:", err);
-      toast({
-        title: "Paiement impossible",
-        description: err.message || "Une erreur est survenue lors de l'ouverture de la passerelle de paiement.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsPaying(false);
-    }
-  };
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -289,6 +212,7 @@ export default function ProfilePage() {
       setAddress(profile.address || '');
       // Si l'utilisateur est PRO approuvé ou en attente, le type local est initialisé
       setType(profile.type || '');
+      setProDurationMonths(profile.requestedProMonths || 1);
       
       // Boutique
       setShopName(profile.shopName || profile.name || '');
@@ -342,6 +266,7 @@ export default function ProfilePage() {
         if (profile?.type !== 'professionnel' && profile?.proStatus !== 'approved') {
           updateData.proStatus = 'pending';
           updateData.isProPending = true;
+          updateData.requestedProMonths = proDurationMonths;
           // Conserver l'ancien type ou particulier temporairement en attendant validation
           updateData.type = profile?.type || 'particulier';
         } else {
@@ -365,7 +290,7 @@ export default function ProfilePage() {
       if (updateData.proStatus === 'pending') {
         sendAdminNotification(db, {
           title: "💼 Demande d'agrément PRO",
-          message: `L'utilisateur ${updateData.name || user.email || 'Utilisateur'} (${user.email}) a demandé l'approbation du statut de Vendeur Professionnel.`,
+          message: `L'utilisateur ${updateData.name || user.email || 'Utilisateur'} (${user.email}) a demandé l'approbation du statut de Vendeur Professionnel pour une durée de ${proDurationMonths} mois.`,
           type: "profile",
           link: "/admin"
         });
@@ -519,22 +444,14 @@ export default function ProfilePage() {
                     <div>
                       <h3 className="font-black uppercase tracking-tight text-amber-800">Demande de profil PRO en attente</h3>
                       <p className="text-xs font-medium leading-relaxed mt-1">
-                        Votre demande de passage au statut Professionnel est en cours de traitement. Pour activer immédiatement votre compte, veuillez régler votre abonnement mensuel de 100 FCFA en ligne, ou contacter notre service commercial au (+221 76 174 06 41).
+                        Votre demande de passage au statut Professionnel pour une durée de **{profile.requestedProMonths || 1} mois** est en cours de traitement. Notre équipe commerciale va vous contacter pour valider votre paiement (total de {((profile.requestedProMonths || 1) * 10000).toLocaleString('fr-FR')} FCFA) et activer votre compte. Vous pouvez également cliquer ci-dessous pour nous contacter directement par WhatsApp.
                       </p>
                     </div>
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-amber-200/50">
-                    <Button 
-                      onClick={() => handlePayOnline('pro')}
-                      disabled={isPaying}
-                      size="sm" 
-                      className="rounded-xl font-bold bg-[#2E5BFF] hover:bg-[#2E5BFF]/90 text-white gap-2 flex-1 border-none h-9 text-[11px]"
-                    >
-                      {isPaying ? <Loader2 className="animate-spin h-3.5 w-3.5" /> : "💳 Payer mon abonnement PRO (100 F)"}
-                    </Button>
-                    <Button asChild size="sm" className="rounded-xl font-bold bg-green-600 hover:bg-green-500 text-white gap-2 flex-1 border-none h-9 text-[11px]">
-                      <a href={`https://wa.me/221761740641?text=Bonjour,%20je%20souhaite%20finaliser%20mon%20abonnement%20PRO%20de%20100%20FCFA%20pour%20le%20compte%20${encodeURIComponent(user.email || "")}`} target="_blank" rel="noopener noreferrer">
-                        <MessageSquare className="h-4 w-4" /> WhatsApp Commercial
+                  <div className="flex gap-3 pt-2 border-t border-amber-200/50">
+                    <Button asChild size="sm" className="rounded-xl font-bold bg-green-600 hover:bg-green-500 text-white gap-2 flex-1 border-none h-11 text-xs">
+                      <a href={`https://wa.me/221761740641?text=Bonjour,%20je%20souhaite%20finaliser%20mon%20abonnement%20PRO%20de%20${profile.requestedProMonths || 1}%20mois%20pour%20le%20compte%20${encodeURIComponent(user.email || "")}`} target="_blank" rel="noopener noreferrer">
+                        <MessageSquare className="h-4 w-4" /> Contacter le Service Commercial (WhatsApp)
                       </a>
                     </Button>
                   </div>
@@ -574,25 +491,13 @@ export default function ProfilePage() {
                         <div className="space-y-1">
                           <p className="text-xs font-black text-amber-700 uppercase tracking-wider">⏳ Demande de badge en cours</p>
                           <p className="text-xs text-muted-foreground font-medium leading-relaxed">
-                            Votre demande de badge Super-Vendeur pour **{profile?.superSellerRequest?.durationDays} jours** a bien été reçue. Vous pouvez régler immédiatement en ligne ou par contact WhatsApp.
+                            Votre demande de badge Super-Vendeur pour **{profile?.superSellerRequest?.durationDays} jours** a bien été reçue. Notre équipe commerciale va vous contacter pour valider votre paiement et activer votre badge. Vous pouvez également cliquer ci-dessous pour nous contacter directement par WhatsApp.
                           </p>
                         </div>
-                        <div className="flex flex-col sm:flex-row gap-2">
-                          <Button 
-                            onClick={() => {
-                              if (profile?.superSellerRequest?.durationDays) {
-                                handlePayOnline('super_seller', profile.superSellerRequest.durationDays);
-                              }
-                            }}
-                            disabled={isPaying}
-                            size="sm" 
-                            className="rounded-xl font-bold bg-primary hover:bg-primary/90 text-white flex-1 h-9 text-[11px] gap-1"
-                          >
-                            {isPaying ? <Loader2 className="animate-spin h-3.5 w-3.5" /> : "💳 Payer en ligne (Wave/OM)"}
-                          </Button>
-                          <Button asChild size="sm" variant="outline" className="rounded-xl font-bold border-amber-300 text-amber-800 hover:bg-amber-100 flex-1 h-9 text-[11px]">
+                        <div className="flex gap-2">
+                          <Button asChild size="sm" className="rounded-xl font-bold bg-green-600 hover:bg-green-500 text-white w-full h-11 text-xs gap-2">
                             <a href={`https://wa.me/221761740641?text=Bonjour,%20je%20souhaite%20finaliser%20mon%20badge%20Super-Vendeur%20de%20${profile?.superSellerRequest?.durationDays}%20jours%20pour%20mon%20compte%20${encodeURIComponent(user.email || "")}`} target="_blank" rel="noopener noreferrer">
-                              <MessageSquare className="h-3.5 w-3.5 mr-1" /> WhatsApp Commercial
+                              <MessageSquare className="h-4 w-4" /> Finaliser ma demande via WhatsApp
                             </a>
                           </Button>
                         </div>
@@ -794,6 +699,23 @@ export default function ProfilePage() {
                           </div>
                         </div>
 
+                        {type === 'professionnel' && (profile?.type !== 'professionnel' || profile?.proStatus !== 'approved') && (
+                          <div className="space-y-2">
+                            <Label htmlFor="edit-pro-months" className="text-xs font-black uppercase tracking-widest text-muted-foreground">Durée d&apos;abonnement souhaitée</Label>
+                            <Select value={String(proDurationMonths)} onValueChange={(val: any) => setProDurationMonths(Number(val))} required>
+                              <SelectTrigger id="edit-pro-months" className="h-12 rounded-xl font-bold">
+                                <SelectValue placeholder="Nombre de mois" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">1 mois (10.000 FCFA)</SelectItem>
+                                <SelectItem value="3">3 mois (30.000 FCFA)</SelectItem>
+                                <SelectItem value="6">6 mois (60.000 FCFA)</SelectItem>
+                                <SelectItem value="12">12 mois (120.000 FCFA - 1 an)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
+
                         <div className="space-y-2">
                           <Label htmlFor="edit-address" className="text-xs font-black uppercase tracking-widest text-muted-foreground">Adresse complète (Dakar, Région...)</Label>
                           <Input 
@@ -809,9 +731,9 @@ export default function ProfilePage() {
 
                       {type === 'professionnel' && (
                         <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl space-y-1">
-                          <p className="text-xs font-black text-amber-700 uppercase tracking-wider">💼 Abonnement Professionnel - 100 FCFA / mois</p>
+                          <p className="text-xs font-black text-amber-700 uppercase tracking-wider">💼 Abonnement Professionnel - 10.000 FCFA / mois</p>
                           <p className="text-xs text-muted-foreground leading-relaxed">
-                            L&apos;approbation administrative de votre compte professionnel prend moins de 24h. Vous serez immédiatement notifié par **Email et WhatsApp** dès validation. Vous pouvez contacter le service commercial pour accélérer le processus ou effectuer votre paiement sécurisé.
+                            L&apos;approbation administrative de votre compte professionnel prend moins de 24h. Vous serez immédiatement notifié par **Email et WhatsApp** dès validation. Vous pouvez contacter le service commercial par WhatsApp pour accélérer le processus de validation de votre paiement.
                           </p>
                         </div>
                       )}

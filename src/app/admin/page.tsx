@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { 
   Check, X, Eye, ShieldAlert, Loader2, Users, FileText, 
   BarChart3, ShieldCheck, Star, Search, ShieldX, UserMinus, 
@@ -33,6 +35,8 @@ export default function AdminPage() {
   const [userSearch, setUserSearch] = useState('');
   const [productSearch, setProductSearch] = useState('');
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+  const [adminSelectedMonths, setAdminSelectedMonths] = useState<Record<string, number>>({});
+  const [adminSelectedBadgeDays, setAdminSelectedBadgeDays] = useState<Record<string, number>>({});
 
   // States for notifications
   const [globalTitle, setGlobalTitle] = useState('');
@@ -781,30 +785,42 @@ export default function AdminPage() {
                               <div className="flex items-center gap-2">
                                 <h4 className="font-black uppercase tracking-tight text-slate-800 text-base">{u.name || 'Nom non défini'}</h4>
                                 <Badge className="font-bold text-[8px] bg-amber-500 hover:bg-amber-600 text-white uppercase tracking-widest px-2.5 py-1 rounded-full border-none">
-                                  En attente de validation (10.000 FCFA/mois)
+                                  En attente de validation
                                 </Badge>
                               </div>
-                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs font-semibold text-muted-foreground pt-1">
+                              <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs font-semibold text-muted-foreground pt-1">
                                 <p className="truncate"><span className="font-bold">Email:</span> {u.email}</p>
                                 <p><span className="font-bold">Tél:</span> {u.phone || 'Non renseigné'}</p>
                                 <p className="truncate"><span className="font-bold">Adresse:</span> {u.address || 'Non renseigné'}</p>
+                                <p className="text-amber-700 font-bold"><span className="font-bold text-muted-foreground">Demande:</span> {u.requestedProMonths || 1} mois</p>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2 flex-wrap md:border-l md:pl-6 flex-shrink-0">
-                              <div className="flex items-center gap-1 bg-muted p-1 rounded-xl">
-                                {[1, 3, 6, 12].map((m) => (
-                                  <Button
-                                    key={m}
-                                    size="sm"
-                                    variant="ghost"
-                                    disabled={isUpdating}
-                                    onClick={() => handleTogglePro(u.uid, u.type || '', m)}
-                                    className="h-8 rounded-lg text-xs font-bold px-3 py-1 text-primary hover:bg-primary hover:text-white transition-colors"
-                                  >
-                                    Activer {m} {m === 1 ? 'mois' : 'mois'}
-                                  </Button>
-                                ))}
+                            <div className="flex items-center gap-3 flex-wrap md:border-l md:pl-6 flex-shrink-0">
+                              <div className="flex items-center gap-2 bg-muted/40 px-3 py-1.5 rounded-xl border">
+                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Durée :</span>
+                                <Select 
+                                  value={String(adminSelectedMonths[u.uid] || u.requestedProMonths || 1)} 
+                                  onValueChange={(val) => setAdminSelectedMonths(prev => ({ ...prev, [u.uid]: Number(val) }))}
+                                  disabled={isUpdating}
+                                >
+                                  <SelectTrigger className="w-24 h-8 rounded-lg font-bold bg-white border-border text-xs">
+                                    <SelectValue placeholder="Mois" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24].map((m) => (
+                                      <SelectItem key={m} value={String(m)}>{m} mois</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                               </div>
+                              <Button
+                                size="sm"
+                                disabled={isUpdating}
+                                onClick={() => handleTogglePro(u.uid, u.type || '', adminSelectedMonths[u.uid] || u.requestedProMonths || 1)}
+                                className="font-black uppercase rounded-xl h-11 bg-green-600 hover:bg-green-500 text-white px-5 gap-1.5"
+                              >
+                                <Check className="h-4 w-4" /> Activer
+                              </Button>
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -872,22 +888,31 @@ export default function AdminPage() {
                               </div>
                             </div>
                             <div className="flex flex-wrap items-center gap-3 md:border-l md:pl-6 flex-shrink-0">
-                              <div className="flex items-center gap-1 bg-muted p-1 rounded-xl">
-                                {[3, 7, 30].map((d) => (
-                                  <Button
-                                    key={d}
-                                    size="sm"
-                                    variant={d === requestedDays ? "default" : "ghost"}
-                                    onClick={() => {
-                                      handleToggleSuperSeller(u.uid, false, d);
-                                    }}
-                                    disabled={isUpdating}
-                                    className="h-8 rounded-lg text-xs font-bold px-3 py-1"
-                                  >
-                                    Activer {d}j
-                                  </Button>
-                                ))}
+                              <div className="flex items-center gap-2 bg-muted/40 px-3 py-1.5 rounded-xl border">
+                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Durée :</span>
+                                <Select 
+                                  value={String(adminSelectedBadgeDays[u.uid] || requestedDays)} 
+                                  onValueChange={(val) => setAdminSelectedBadgeDays(prev => ({ ...prev, [u.uid]: Number(val) }))}
+                                  disabled={isUpdating}
+                                >
+                                  <SelectTrigger className="w-24 h-8 rounded-lg font-bold bg-white border-border text-xs">
+                                    <SelectValue placeholder="Jours" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {[3, 5, 7, 14, 30, 90].map((d) => (
+                                      <SelectItem key={d} value={String(d)}>{d} jours</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                               </div>
+                              <Button
+                                size="sm"
+                                disabled={isUpdating}
+                                onClick={() => handleToggleSuperSeller(u.uid, false, adminSelectedBadgeDays[u.uid] || requestedDays)}
+                                className="font-black uppercase rounded-xl h-11 bg-green-600 hover:bg-green-500 text-white px-5 gap-1.5"
+                              >
+                                <Check className="h-4 w-4" /> Activer
+                              </Button>
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -979,35 +1004,95 @@ export default function AdminPage() {
  
                           <div className="flex flex-wrap items-center gap-3 md:border-l md:pl-6">
                             {/* Élever/Rétrograder Pro */}
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              disabled={isUpdating || u.email === 'ndaw22@gmail.com'}
-                              onClick={() => handleTogglePro(u.uid, u.type || '')}
-                              className={cn(
-                                "font-black uppercase rounded-xl h-10 gap-1.5",
-                                isUserPro ? "text-amber-600 hover:text-amber-700 bg-amber-50 border-amber-200" : "text-foreground"
-                              )}
-                            >
-                              <Star className={cn("h-4 w-4", isUserPro ? "fill-amber-500 text-amber-500" : "")} />
-                              {isUserPro ? "Rétrograder" : "Élever en PRO"}
-                            </Button>
-
-                            {/* Option Super-Vendeur (seulement pour les PROs) */}
-                            {isUserPro && (
+                            {!isUserPro ? (
+                              <div className="flex items-center gap-2 bg-muted/40 px-3 h-10 rounded-xl border border-border/60">
+                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Durée :</span>
+                                <Select 
+                                  value={String(adminSelectedMonths[u.uid] || 1)} 
+                                  onValueChange={(val) => setAdminSelectedMonths(prev => ({ ...prev, [u.uid]: Number(val) }))}
+                                  disabled={isUpdating}
+                                >
+                                  <SelectTrigger className="w-20 h-7 rounded-lg font-bold bg-white border-border text-xs">
+                                    <SelectValue placeholder="Mois" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24].map((m) => (
+                                      <SelectItem key={m} value={String(m)}>{m} mois</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  disabled={isUpdating || u.email === 'ndaw22@gmail.com'}
+                                  onClick={() => handleTogglePro(u.uid, u.type || '', adminSelectedMonths[u.uid] || 1)}
+                                  className="font-black uppercase rounded-lg h-7 gap-1 border-none bg-primary text-white hover:bg-primary/95 text-[10px] px-2.5"
+                                >
+                                  <Star className="h-3 w-3 fill-white text-white" />
+                                  Élever en PRO
+                                </Button>
+                              </div>
+                            ) : (
                               <Button 
                                 size="sm" 
                                 variant="outline"
                                 disabled={isUpdating || u.email === 'ndaw22@gmail.com'}
-                                onClick={() => handleToggleSuperSeller(u.uid, u.isSuperSeller === true)}
+                                onClick={() => handleTogglePro(u.uid, u.type || '')}
                                 className={cn(
-                                  "font-black uppercase rounded-xl h-10 gap-1.5 transition-all duration-300",
-                                  u.isSuperSeller ? "text-amber-500 hover:text-amber-600 bg-amber-50 border-amber-300 shadow-sm" : "text-foreground"
+                                  "font-black uppercase rounded-xl h-10 gap-1.5",
+                                  "text-amber-600 hover:text-amber-700 bg-amber-50 border-amber-200"
                                 )}
                               >
-                                <Sparkles className={cn("h-4 w-4", u.isSuperSeller ? "fill-amber-500 text-amber-500 animate-pulse" : "")} />
-                                {u.isSuperSeller ? "Rétrograder Super" : "Super-Vendeur"}
+                                <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+                                Rétrograder
                               </Button>
+                            )}
+
+                            {/* Option Super-Vendeur (seulement pour les PROs) */}
+                            {isUserPro && (
+                              !u.isSuperSeller ? (
+                                <div className="flex items-center gap-2 bg-muted/40 px-3 h-10 rounded-xl border border-border/60">
+                                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Badge :</span>
+                                  <Select 
+                                    value={String(adminSelectedBadgeDays[u.uid] || 7)} 
+                                    onValueChange={(val) => setAdminSelectedBadgeDays(prev => ({ ...prev, [u.uid]: Number(val) }))}
+                                    disabled={isUpdating}
+                                  >
+                                    <SelectTrigger className="w-20 h-7 rounded-lg font-bold bg-white border-border text-xs">
+                                      <SelectValue placeholder="Jours" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {[3, 5, 7, 14, 30, 90].map((d) => (
+                                        <SelectItem key={d} value={String(d)}>{d} jours</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    disabled={isUpdating || u.email === 'ndaw22@gmail.com'}
+                                    onClick={() => handleToggleSuperSeller(u.uid, false, adminSelectedBadgeDays[u.uid] || 7)}
+                                    className="font-black uppercase rounded-lg h-7 gap-1 border-none bg-gradient-to-r from-amber-500 to-yellow-500 text-white hover:from-amber-600 hover:to-yellow-600 text-[10px] px-2.5"
+                                  >
+                                    <Sparkles className="h-3 w-3 fill-white text-white" />
+                                    Super-Vendeur
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  disabled={isUpdating || u.email === 'ndaw22@gmail.com'}
+                                  onClick={() => handleToggleSuperSeller(u.uid, true)}
+                                  className={cn(
+                                    "font-black uppercase rounded-xl h-10 gap-1.5 transition-all duration-300",
+                                    "text-amber-500 hover:text-amber-600 bg-amber-50 border-amber-300 shadow-sm"
+                                  )}
+                                >
+                                  <Sparkles className="h-4 w-4 fill-amber-500 text-amber-500 animate-pulse" />
+                                  Rétrograder Super
+                                </Button>
+                              )
                             )}
  
                             {/* Bannir/Débannir */}

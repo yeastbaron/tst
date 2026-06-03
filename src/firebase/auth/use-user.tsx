@@ -18,6 +18,7 @@ export interface UserProfile {
   isBanned: boolean;
   createdAt: any;
   proStatus?: 'pending' | 'approved' | 'rejected' | null;
+  requestedProMonths?: number;
   proExpiresAt?: any;
   isSuperSeller?: boolean;
   superSellerExpiresAt?: any;
