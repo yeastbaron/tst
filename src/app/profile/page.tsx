@@ -77,7 +77,7 @@ export default function ProfilePage() {
     try {
       const refCommand = `txn_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
       
-      let price = 10000;
+      let price = 100;
       if (paymentType === 'super_seller') {
         if (durationDays === 3) price = 10000;
         else if (durationDays === 7) price = 20000;
@@ -519,7 +519,7 @@ export default function ProfilePage() {
                     <div>
                       <h3 className="font-black uppercase tracking-tight text-amber-800">Demande de profil PRO en attente</h3>
                       <p className="text-xs font-medium leading-relaxed mt-1">
-                        Votre demande de passage au statut Professionnel est en cours de traitement. Pour activer immédiatement votre compte, veuillez régler votre abonnement mensuel de 10.000 FCFA en ligne, ou contacter notre service commercial au (+221 76 174 06 41).
+                        Votre demande de passage au statut Professionnel est en cours de traitement. Pour activer immédiatement votre compte, veuillez régler votre abonnement mensuel de 100 FCFA en ligne, ou contacter notre service commercial au (+221 76 174 06 41).
                       </p>
                     </div>
                   </div>
@@ -530,10 +530,10 @@ export default function ProfilePage() {
                       size="sm" 
                       className="rounded-xl font-bold bg-[#2E5BFF] hover:bg-[#2E5BFF]/90 text-white gap-2 flex-1 border-none h-9 text-[11px]"
                     >
-                      {isPaying ? <Loader2 className="animate-spin h-3.5 w-3.5" /> : "💳 Payer mon abonnement PRO (10K)"}
+                      {isPaying ? <Loader2 className="animate-spin h-3.5 w-3.5" /> : "💳 Payer mon abonnement PRO (100 F)"}
                     </Button>
                     <Button asChild size="sm" className="rounded-xl font-bold bg-green-600 hover:bg-green-500 text-white gap-2 flex-1 border-none h-9 text-[11px]">
-                      <a href={`https://wa.me/221761740641?text=Bonjour,%20je%20souhaite%20finaliser%20mon%20abonnement%20PRO%20de%2010.000%20FCFA%20pour%20le%20compte%20${encodeURIComponent(user.email || "")}`} target="_blank" rel="noopener noreferrer">
+                      <a href={`https://wa.me/221761740641?text=Bonjour,%20je%20souhaite%20finaliser%20mon%20abonnement%20PRO%20de%20100%20FCFA%20pour%20le%20compte%20${encodeURIComponent(user.email || "")}`} target="_blank" rel="noopener noreferrer">
                         <MessageSquare className="h-4 w-4" /> WhatsApp Commercial
                       </a>
                     </Button>
@@ -809,7 +809,7 @@ export default function ProfilePage() {
 
                       {type === 'professionnel' && (
                         <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl space-y-1">
-                          <p className="text-xs font-black text-amber-700 uppercase tracking-wider">💼 Abonnement Professionnel - 10.000 FCFA / mois</p>
+                          <p className="text-xs font-black text-amber-700 uppercase tracking-wider">💼 Abonnement Professionnel - 100 FCFA / mois</p>
                           <p className="text-xs text-muted-foreground leading-relaxed">
                             L&apos;approbation administrative de votre compte professionnel prend moins de 24h. Vous serez immédiatement notifié par **Email et WhatsApp** dès validation. Vous pouvez contacter le service commercial pour accélérer le processus ou effectuer votre paiement sécurisé.
                           </p>

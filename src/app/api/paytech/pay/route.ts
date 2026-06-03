@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     let commandName = "";
 
     if (type === 'pro') {
-      price = 10000;
+      price = 100;
       itemName = "Abonnement Vendeur PRO (1 mois)";
       commandName = "Abonnement PRO - SalleDeVente.sn";
     } else if (type === 'super_seller') {
