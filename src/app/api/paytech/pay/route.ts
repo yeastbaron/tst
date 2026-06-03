@@ -53,8 +53,12 @@ export async function POST(req: Request) {
       );
     }
 
-    // Base URL de l'application
-    const baseUrl = "https://sdvmarketplace-backend--sdvmarketplace.us-east4.hosted.app";
+    // Base URL de l'application (déterminée dynamiquement pour préserver le domaine personnalisé)
+    const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "salledevente.sn";
+    const proto = req.headers.get("x-forwarded-proto") || "https";
+    const baseUrl = host.includes("localhost") || host.includes("127.0.0.1")
+      ? `http://${host}`
+      : `${proto}://${host}`;
 
     // Préparer la requête vers l'API de PayTech
     const payload = {
